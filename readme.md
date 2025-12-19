@@ -39,3 +39,7 @@ An MCP server for the Weaviate Podcast!
 [124] RAG Benchmarks with Nandan Thakur
 - [YouTube](https://www.youtube.com/watch?v=x9zZ03XtAuY)
 - [Spotify](https://spotifycreators-web.app.link/e/uEuSjPtSUYb)
+
+[123] MUVERA with Rajesh Jayaram and Roberto Esposito
+- [YouTube](https://www.youtube.com/watch?v=nSW5g1H4zoU)
+- [Spotify](https://spotifycreators-web.app.link/e/nAni3PtSUYb)
