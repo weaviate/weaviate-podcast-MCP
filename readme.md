@@ -23,3 +23,7 @@ An MCP server for the Weaviate Podcast!
 [128] Weaviate's Query Agent with Charles Pierse
 - [YouTube](https://www.youtube.com/watch?v=TRTHw6vdVso)
 - [Spotify](https://spotifycreators-web.app.link/e/bt9QUMtSUYb)
+
+[127] GEPA with Lakshya A. Agrawal
+- [YouTube](https://www.youtube.com/watch?v=fREQrxhBSk0)
+- [Spotify](https://spotifycreators-web.app.link/e/xBLNlNtSUYb)
