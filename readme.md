@@ -31,3 +31,7 @@ An MCP server for the Weaviate Podcast!
 [126] Agentic Topic Modeling with Maarten Grootendorst
 - [YouTube](https://www.youtube.com/watch?v=Lt6CRZ7ypPA)
 - [Spotify](https://spotifycreators-web.app.link/e/G9vd7NtSUYb)
+
+[125] Sufficient Context with Hailey Joren
+- [YouTube](https://www.youtube.com/watch?v=EU8BUMJLd54)
+- [Spotify](https://spotifycreators-web.app.link/e/FA7aAOtSUYb)
