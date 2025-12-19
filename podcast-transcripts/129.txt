@@ -1,0 +1,452 @@
+00:00:00,200 --> 00:00:17,360 [Speaker 0]
+Hey, everyone. Thank you so much for watching another episode of the Weaviate podcast. Today, we're diving into our partnership between Weaviate and SAS. SAS is doing all sorts of amazing things with the SAS Retrieval Agent Management- Manager in their partnership with Weaviate. I'm super excited to discuss these things further. And firstly, I'm super excited to welcome Weaviate co-founder, Bob van Luit. Bob, thank you- 
+
+00:00:17,360 --> 00:00:17,370 [Speaker 1]
+Woo 
+
+00:00:17,370 --> 00:00:19,040 [Speaker 0]
+... so much for joining the podcast again. 
+
+00:00:19,040 --> 00:00:22,390 [Speaker 1]
+Thanks for having me again on our, our own podcast [laughs]. 
+
+00:00:22,390 --> 00:00:29,440 [Speaker 0]
+[laughs] Awesome. I'm also super excited to welcome Saurabh Mishra from SAS. Saurabh, thanks so much for joining the podcast. 
+
+00:00:29,440 --> 00:00:33,960 [Speaker 1]
+Hey, everyone. Uh, nice to have, uh, nice to be here. Thanks, Connor and Bob. 
+
+00:00:33,960 --> 00:00:37,020 [Speaker 0]
+Great. 
+
+00:00:37,020 --> 00:00:37,440 [Speaker 1]
+Uh- 
+
+00:00:37,440 --> 00:00:39,400 [Speaker 0]
+Awesome. Um, Bob, maybe you kick it off, um, I- 
+
+00:00:39,400 --> 00:00:40,740 [Speaker 1]
+Yeah, yeah, yeah. 
+
+00:00:40,740 --> 00:00:44,949 [Speaker 1]
+I will... I-... Because I'm- I'm always... Connor, you always have these great exciting, uh- 
+
+00:00:44,949 --> 00:00:44,949 [Speaker 0]
+[laughs] 
+
+00:00:44,949 --> 00:00:49,990 [Speaker 1]
+... you know, you kick these things off, so I'm always like... I'm- I'm almost like cur... Is that coming more or is this... You know. 
+
+00:00:49,990 --> 00:00:50,490 [Speaker 0]
+[laughs] 
+
+00:00:50,490 --> 00:01:08,020 [Speaker 1]
+No, but it's Saurabh, it's- it's great to have you here. And it's like a... Just before we started, you said something super interesting because... And I think that it would be great to start there, is you talked about, um, uh, uh, h- what you're seeing around RAG and how those use cases are growing. 
+
+00:01:08,020 --> 00:01:08,030 [Speaker 2]
+Mm-hmm. 
+
+00:01:08,030 --> 00:01:47,580 [Speaker 1]
+And how we think about this at Weaviate is that we see like, basically we're just like, first, we had like retrieval. Then from retrieval, we got to RAG. And then from RAG, out of that, we got to the agents. Yeah. So I would love to get, like, your take or maybe even SAS' take on- on, like, how you see the development, how you see that happening with- with customers and with- with- with- with users. And then we can nicely go into, of course, what you've launched, but I would love to get your take also, l- maybe a little bit from a historic perspective, uh, on that. Yes. Yeah, we can definitely g- be a little bit historic here, which in today's time just goes back to last year, um, because that's [laughs]- 
+
+00:01:47,580 --> 00:01:49,660 [Speaker 0]
+Exactly, yes. 
+
+00:01:49,720 --> 00:06:38,352 [Speaker 1]
+That's when we started thinking about it. So we started thinking about RAG really, um, first part of last year, where we started to kind of, uh, see that, you know, obviously language models have been a craze at that time. Everybody was talking about, you know, the weekly average number of users that ChatGPT has and it's growing. But there was this- there was this challenge of, you know, kind of adapting it to an enterprise scenario. And we started to kind of dig deeper into that, and, you know, you quickly find out that the majority of enterprise data is unstructured. And for- for you to kind of unlock enterprise use cases, you gotta be able to take general-purpose tooling, like the language models, and kind of tailor them to a scenario where they can be applied to that enterprise data. And RAG just seemed like the right pattern, so that's kind of... You know, when we f- first got serious about it, I mean, the- the aspect that we really liked is the fact that it is not tightly coupled to the model. So your- your model and data can change, which is- which is really good, which is very practical, which is what happens. Uh, so- so we started look- look at that. And then our first foray into this- this- this space was looking at the embeddings. How do you generate embeddings? So everybody was talking about RAG, but, you know, like, even before you get to the R of RAG, you need to do some preparation, right? I mean, your documents need to be prepared. And it just seemed to us at the time, um, that, you know, not a lot of people were talking about the preparation, and that could be a time-consuming, messy task. So- so we were like, "Well, how about we tackle this?" So- so we already have some capabilities within our portfolio that- that we use to operationalize complex AI pipelines, and we- we work with, uh, models that are obviously, you know, machine learning models that are trained with SAS, but we- we also use, uh, models that are trained elsewhere, right? I mean, we wanna give flexibility to data scientists. And this- this engine that we use is- is really versatile, really performing. So the first thing that we started to do was that let's- let's test if the- if the embedding pipeline, the pipeline to create, uh, embedding from documents can be manifested in this- in this engine. So we did that, and that- that seemed to work really well. And, you know, we were talking about customer scenarios emerging. So around the late summer of last year, we had a- a major manufacturer- manufacturing customer of ours, you know, approach us. And this is a, you know, large US-based manufacturer, kind of forward-leaning, and they already have, uh, you know... Predictive maintenance is a huge use case in manufacturing. And these guys run, you know, massive assets, and, you know, keeping up those assets and making sure they're not going down when not expected is a hu- a huge deal for them. So they already do, uh, you know, the typical things. Like, they already use machine learning on fast-moving sensor data, trying to anticipate anomalies and- and issues that might be happening. But what they were getting challenged is that this part is working fine. There's value getting created, but w- the output of this first part is- is a lot of alerts, right? And you have these alerts coming, and you're seeing that, you know, fault code coming up, this part. And then the next question is like, "Well, how do I address it?" And the answer to that question almost always is, "Go to documents." You know, you're talking about documents which are intense, dense. Manuals and maintenance logs, and which could be, like, hundreds of them, you know, fragmented across the company just depending on the scale of- of this. So then we started to kind of really dive into that. That was kind of our inspiration, that what if we converged these two workflows? Like, you know, the first part, which was like taking telemetry data, applying machine learning, and understanding what anomalies might be happening. And then once I have an anomaly, using that to kind of form a very sophisticated prompt that can then query across my knowledge base and come back with, uh, "Here is an actionable plan for you." Right? So this manufacturer's vision was to kind of eliminate the concept of fault codes and things like that, but just present a plan to their technician.So, that kind of pushed us forward. And we were like, well, this is an important, important capability. And we were like, this whole part of preparing data needs to be simplified. So then we started the journey of kind of developing a no-code user interface on top of it, which is what, you know... and we continued to iterate with it. And we started to look at options where it can be deployed in the cloud, can be deployed on-prem. We started to... A lot of our customers are in healthcare and government space. And, and some of them are 
+
+00:06:38,352 --> 00:07:05,751 [Speaker 1]
+averse to, you know, just kind of putting data wherever. Uh, so they wanted to kind of maintain control of it. So we started to look at, you know, what is the right architecture? And, you know, vector databases are just, just fundamental to this, right? I mean, you guys obviously know this, um, but I just want to make sure that everybody else [laughs] does. Uh, and we're like, well, you know, who are the leading vector databases? And that's how we kind of got connected and, and started. So, that's the, that's the historical perspective. 
+
+00:07:05,751 --> 00:07:37,402 [Speaker 3]
+Yeah, that... And, and just out of curiosity, so when... So, when was for you, like really you personally... Because, I mean, the whole deep learning wave, it's, is now happening for, what is it, like 12, 13 years, or 14 years maybe, that it just all started again? When was the... When was the time that you were like, "Okay, now, now we're serious. This is like... Now this is gonna change everything"? How, how long ago was that for you? Just for you personally? 
+
+00:07:37,402 --> 00:08:06,482 [Speaker 1]
+I would say personally, that was, uh, beginning of last year, right? Because I was, I was tracking the, the generative AI space. And I was, like I said, I was tracking like, the likes of ChatGPT and, and Claude getting, getting prominence. And everybody talking about, you know, millions of users on it. And, you know, being in a company like SAS, I always have, uh, more of an enterprise B2B lens. And I always try to kind of map like, you know, this is primarily a B2C led revolution, right? 
+
+00:08:06,482 --> 00:08:06,942 [Speaker 3]
+Mm-hmm. 
+
+00:08:06,942 --> 00:09:32,912 [Speaker 1]
+And what would it take to, you know, kind of make a connection back to the B2B enterprise side? And, and I thought RAG was this like really solid pattern that could, that could try to bridge this gap. So that, I would say the beginning of last year was number nine. Started to kind of really dive into this and had, had a little bit of a realization that, you know, look, for us to kind of take these powerful generative capabilities, but general-purpose capabilities, and make sure that they can unlock enterprise use cases, will definitely require an ability for them to speak to the enterprise data. And, you know, people were talking about, "Well, I can train a language model. I can fine-tune a language model." I mean, I, I, I don't know how many people are really seriously doing that. And, you know, then if... People still ask us about fine-tuned models. Uh, you know, we have a lot of customer conversation going on, and they're like, "Well, what about fine-tuned models?" I'm like, "If you're able to go ahead and fine-tune a model, it is not going to preclude RAG from being applied." You can still... I mean, that could be your model, right? Because your fine-tuned model still is capturing a snapshot in time, right? Unless you are fine-tuning it as fast as your data is changing, it is still going to get stale at some point in time. So RAG gives you a way to bring fresh data into it. So yeah, I would say, well, beginning of last year was kind of that realization for me. 
+
+00:09:32,912 --> 00:09:45,152 [Speaker 3]
+Yeah. And I... So I have a question around that. So I have with the... With... So, when I think about the enterprise, right? Just not specifically for AI, but in general. And, and I'm gonna 
+
+00:09:45,152 --> 00:09:53,612 [Speaker 3]
+overly generalize, but I, I, I, I'm just curious what your thoughts are on this. So the... I always think like in the enterprise, there, there are people 
+
+00:09:53,612 --> 00:09:59,012 [Speaker 3]
+whose job it is to figure out why you can't do something. 
+
+00:09:59,012 --> 00:09:59,791 [Speaker 1]
+[laughs] 
+
+00:09:59,791 --> 00:10:02,752 [Speaker 3]
+And then there's people whose job it is to 
+
+00:10:02,752 --> 00:10:03,781 [Speaker 3]
+do new stuff, right? 
+
+00:10:03,781 --> 00:10:03,791 [Speaker 1]
+Yeah. 
+
+00:10:03,791 --> 00:10:09,682 [Speaker 3]
+And then there's... So, and the first group is like, I, I don't know, might be risk manager something, right? 
+
+00:10:09,682 --> 00:10:09,752 [Speaker 1]
+Yeah. 
+
+00:10:09,752 --> 00:10:16,832 [Speaker 3]
+Or someone's like, "Are we... Did we think about, you know, uh, privacy?" Which, by all means, very important- 
+
+00:10:16,832 --> 00:10:16,932 [Speaker 1]
+Yes 
+
+00:10:16,932 --> 00:10:19,432 [Speaker 3]
+... but, you know, but, but 
+
+00:10:19,432 --> 00:10:42,771 [Speaker 3]
+that group, I just want to, I want to, I want to park over here right now because that's like a... that I understand that and I appreciate that. It's very important that that needs to happen. But I'm actually interested in that, in that second group. What... How do you see or think that for that group that are building within the enterprise these AI applications or these RAG applications... 
+
+00:10:42,771 --> 00:10:57,281 [Speaker 3]
+How might the challenge be different for them to do things than, uh, for, let's say, a startup on the complete other end of the spectrum, building something AI-native? And again, I understand that, that, that first group, that... A startup doesn't have that first group, right? 
+
+00:10:57,281 --> 00:10:57,332 [Speaker 1]
+Yeah. 
+
+00:10:57,332 --> 00:11:00,892 [Speaker 3]
+So... But I... Everybody gets that, right? That's the thing. 
+
+00:11:00,892 --> 00:11:01,122 [Speaker 1]
+Right. 
+
+00:11:01,122 --> 00:11:03,021 [Speaker 3]
+I'm really thinking about it from a building perspective. 
+
+00:11:03,021 --> 00:11:03,051 [Speaker 1]
+Right. 
+
+00:11:03,051 --> 00:11:23,551 [Speaker 3]
+What are, what are challenges you're seeing in the enterprise, like why is it sometimes difficult for people... Or maybe it's not difficult at all. Maybe that's just not... Uh, maybe you, you, you think like that, that you haven't seen the difficulties. I'm just curious, why might it be difficult for those builders in the enterprise to get these AI applications off the ground? 
+
+00:11:23,551 --> 00:12:30,528 [Speaker 1]
+Yeah. No, first of all, you're absolutely right. There are those two camps and they exist in most large companies. So for, for the builders, I think, uh, I think the challenge was, uh, around... I think they would typically start with one of these frameworks, so you know, start with, you know, LangChain or likes. Um, they... A lot of them were able to tinker fast, right? I mean, they were able to kind of put things together and like, "Look, you know, here is something that I've created." But, you know, a lot of sponsorship in enterprise context comes from taking things to production and being able to kind of scale from there. And, and, and that was a challenge because these were...... somewhat flaky, uh, if, if you will. Why, you know, stuff that, that, that they put together and, you know, by the time they get to a point where, okay, I have this thing working, you find out that there's a new version of the framework. And the framework has changed under you, right? So it's a little bit of, I think, a mix of that, look, I need to be able to take this into production, uh, and some of these frameworks were 
+
+00:12:30,528 --> 00:13:30,898 [Speaker 1]
+great at building POCs, but not necessarily production level software. Um, you still require pretty serious engineering skills to them architect around it, to be, to be ready. I mean, that, that's al- also come back to do you have enough bandwidth and skillset? And I think the fact that, you know, there were so many choices, and frameworks changing all the time just kind of creates this, this, this challenge a- around like what exactly are we... What is our tech stack, uh, that we're building with, right? So ultimately that, that becomes the challenge. That, you know, it was, it was just not fast enough for them to, you know, take something from POC to production and then, then scale. I mean, this is not a new challenge. I mean, ed- enterprises face this challenge all the time, but this was no different, right? So that's, that's kind of what I s- what I, at least what I observed. We also work with enterprises that are, that are, you know, more in the way of more futuristic and they have- 
+
+00:13:30,898 --> 00:13:30,898 [Speaker 3]
+Okay 
+
+00:13:30,898 --> 00:13:41,988 [Speaker 1]
+... the right in-house capabilities who have the experience of doing it. They were successful but they can't [clears throat] probably count them on, you know, my fingers on one hand. 
+
+00:13:41,988 --> 00:13:42,258 [Speaker 3]
+Yeah, yeah. 
+
+00:13:42,258 --> 00:13:47,348 [Speaker 1]
+Um, they were just so far and few. The majority of them were just tripping over it. 
+
+00:13:47,408 --> 00:14:24,137 [Speaker 3]
+Yeah, yeah. And actually, your, y- you, you, that's super interesting. And, and there was one thing in particular that I would like to double click on. You said something around the, um, uh, y- you said like the things that have changed because of AI which also mentioned the things that have not changed. And so for example I, I, uh, earlier today I had a conversation with somebody and we were talking about like the database agents that we have within, uh, the query agents within Weaviate and we talked about RBAC. And like traditional role-based access control that we said like, "That is something that's even for an agent that is just like unchanged." Right? So people just get access to stuff or they don't, right? 
+
+00:14:24,137 --> 00:14:24,148 [Speaker 1]
+[laughs] 
+
+00:14:24,148 --> 00:14:45,308 [Speaker 3]
+That is just, that is unchanged. I'm just curious in everything, uh, that you see happening with these AI u- use cases, what are you s- actually surprised of that has not changed? Where you actually go like, "Well, actually I was thinking this might have changed but actually didn't." It's like, "It is very traditional still." 
+
+00:14:45,308 --> 00:15:06,128 [Speaker 1]
+Well, I mean, I think it's probably a boring answer but the challenge with data has not changed. Every, like, all the, all the data challenges are still there because I think people still underestimate the, the amount of work it requires to get their data ready. Um, and, and, and that has, that has not changed. Um, 
+
+00:15:06,128 --> 00:15:46,968 [Speaker 1]
+I think the other thing that has not changed is, uh, the, the security overlay that is such important thing and, um, I think that, that concern around it, and you talked about, you know, this first group and second group. I think there's people in the first group who are, you know, who are meant to be risk averse. I mean, that's their role and they, they want to make sure that they have the right security infrastructure in place. So I think that has not changed, and that is leading to some interesting conversations because a lot of, you know, common wisdom is that I need to talk to language model. And you know, you often think about, well, I need to get one from OpenAI, or I want to get one from Anthropic. That does require fundamentally for you to 
+
+00:15:47,028 --> 00:15:52,488 [Speaker 1]
+get your data to them, right? I mean, whatever is goes in the prompt is, is being shipped to them. Right? 
+
+00:15:52,488 --> 00:15:52,548 [Speaker 3]
+Mm-hmm. 
+
+00:15:52,548 --> 00:16:49,328 [Speaker 1]
+So there are regulated industries which are like, you know, is this, is this right? You know, so that, the security first mindset, you know, is this something that we can, we can... Security or and privacy as well, right? I mean, it's not just about security. So that has, has not changed, right? I mean, there is, there is that still that I think it's probably a good thing, it's a rigor. Um, you could see that the second camp could be unhappy sometimes because it might slow them down. But, but I think the fact that much of data management, just data cataloging, that continues to be a, a challenge. And people who have invested in this, you know, are probably able to move for- faster than people who haven't. Which is true for a lot of AI and general enterprise applications. And the, the rigor that they put around security and privacy I think is still there. 
+
+00:16:49,328 --> 00:17:10,657 [Speaker 3]
+Yeah. Oh, yeah, that's, that's, th- that is, that is super interesting. And as, I was thinking if we, if we go to the reverse of that, right? So I think one of those great things I, I was recently I, I had it in a, in a, in a spreadsheet. So I was using, um, um, I was using, uh, um, a Google, uh, s- a spreadsheet so I- 
+
+00:17:10,657 --> 00:17:10,748 [Speaker 1]
+Mm-hmm 
+
+00:17:10,748 --> 00:17:19,628 [Speaker 3]
+... they now have this new function in the spreadsheet that's like equal AI. And, and one of the nice things was like I wanted to make a list of something- 
+
+00:17:19,628 --> 00:17:20,367 [Speaker 1]
+Yeah 
+
+00:17:20,367 --> 00:17:30,828 [Speaker 3]
+... uh, but the, it, the, the, it was in that, in, in, in that, in that spreadsheet in, in, in free text format. So basically in the prompt I said like, "Pick one of those, I don't know, five options." 
+
+00:17:30,828 --> 00:17:31,497 [Speaker 1]
+Yeah. 
+
+00:17:31,497 --> 00:17:49,627 [Speaker 3]
+And then based on these three text fields, create that structured data for me. And I found that extremely, extremely powerful. The... but it's of course interesting though that I, um, eh, that I noticed that here and there it made a mistake. So it, it was like a... it, it should have actually been the other option- 
+
+00:17:49,708 --> 00:17:49,878 [Speaker 1]
+Yeah 
+
+00:17:49,878 --> 00:18:00,228 [Speaker 3]
+... um, uh, but it wa- was just too ambiguous or not done enough context or not enough information. And because me as a human reading the text that was in that cell- 
+
+00:18:00,228 --> 00:18:00,368 [Speaker 1]
+Right 
+
+00:18:00,368 --> 00:18:03,728 [Speaker 3]
+... I knew that the, that it, that it was wrong. 
+
+00:18:03,728 --> 00:18:03,928 [Speaker 1]
+Yeah. 
+
+00:18:03,928 --> 00:18:26,639 [Speaker 3]
+So the... how are we dealing with... or how are you dealing with, especially in the end with enterprise customers is that-It, it feels to me that the, um, uh, the value that we're getting from AI, especially when it comes to RAG, so when the data goes into the model and then something comes out, that the, the cost of that, and I don't mean cost in, like, dollar amount cost- 
+
+00:18:26,639 --> 00:18:26,919 [Speaker 1]
+Yeah 
+
+00:18:26,919 --> 00:18:35,919 [Speaker 3]
+... but the cost as in, like, uh, um, uh, um, uh, y- you know, the thing that we have to give into is, like, accuracy. So, we just need to accept- 
+
+00:18:35,919 --> 00:18:36,020 [Speaker 1]
+Yeah 
+
+00:18:36,020 --> 00:18:59,340 [Speaker 3]
+... the fact it just cannot be 100% accurate. That's just a... It... Yeah, we have to accept that. How, how do... How big of a challenge do you see that in, in... with your Enterprise customers? Do you think that's more like an, an adoption cycle, or is it actually something that really needs to be resolved before people really can, you know, continue to implement these kind of solutions, especially for mission-critical, uh, applications? 
+
+00:18:59,340 --> 00:19:24,460 [Speaker 1]
+Yeah. That's a really, really good question, right? Because I think that's, uh, that's at some level kind of almost the, the unlock that needs to happen at some level. Because there is... You know, anytime you have a language model in the mix, there is some level of non-determinism that exists in your workflow, and you cannot, you cannot completely get around it. So, I think 
+
+00:19:24,460 --> 00:20:25,240 [Speaker 1]
+there's a couple of ways that, that we are trying to address. One is that, you know, how do we make sure that, like, from our perspective, our capabilities, our products offer the right information so that the users can, can trust it, that it's reliable, right? So, so we, you know, obviously are, from our perspective are investing in, in AI evals, so that, you know, we can allow the users to generate their own evals and, and test with it. Um, then, you know, every response that we create, we show citations. And we actually in our... In our product, we are able to kind of take those citations, so we see that, "Okay, here are the chunks that we pulled," and then we actually allow them to click on that chunk, and it goes to that document. Like, and you actually scroll to that document, to that page, like, "This is the paragraph that you just saw there," right? So, so, so just at feature level, stuff like that is, is building some level of, like, trust. Like, you know, this is... Okay, here is how the response was generated. 
+
+00:20:25,240 --> 00:22:14,399 [Speaker 1]
+But I think there is still a fundamental level of, like, "What am I comfortable letting this do?" Right? So, this is, this is still a, a big question, right? So, if, if I'm supporting a chat interface with a natural language, and then I think, "Yes, I- I'm good." I can... I am receiving the information, and I'm deciding the next course of action. I mean, this is something, like, it's synthesizing, it's summarizing for me, and I can, I can decide that, right? So, so that I think is... There is good adoption, right? I mean, chat-based assistants are, are doing well. But then you start to think about agents, and one key characteristic of an agent, uh, has to be autonomy. And I think that's where, that's where the, the, the challenge lies. So, what... At least what we are seeing is that, you know, the, the... The, the... I think there's two aspects, right? One is human-in-the-loop agents. So, you know, especially for mission-critical tasks, the agent will get to a certain point and then require a human to almost just say that, "Yes, this makes sense. Go ahead and do that." So, so that's one way that they are addressing it. And other way is that your agentic workflow could combine, uh, a more traditional, either a rule-based approach or a deterministic model along with, you know, a RAG call or an LLM call. So that, you know that... Let's say, if you're... You know, you talk about, let's say, a ... application somebody applies. So, you, you're not passing that to the LLM to make that, that determination. So, you will have, you know, a bit... You know, more, um, traditional, if I can call it, machine learning model that decides that. But in terms of, let's say, doing anything else, like, you know, creating the, the offer letter or whatever it is, you can obviously use, use a l- l- large language models to do that. So, I think that's kind of what we are seeing- 
+
+00:22:14,399 --> 00:22:14,409 [Speaker 3]
+Mm-hmm 
+
+00:22:14,409 --> 00:22:43,440 [Speaker 1]
+... that, you know, keeping human-in-the-loop for machine-critical tasks where even though it's maybe a, a stamp of approval, but the user provides that. Or your agentic flows, um, could include more of a... more traditional deterministic models so that you know that those are proven, hardened, and I have tested them. Um, but I think that's... That is... I mean, we're s- still on this journey. We, uh... So, I don't know exactly what patterns could unlock in future, but that's at least what, what we are seeing. 
+
+00:22:43,440 --> 00:22:57,199 [Speaker 3]
+Yeah. And the... So that, that's, that's s- that's super insightful. And I think, I'm, I'm also c-... I just want to go a little bit more into the platform, actually, right? So, because, uh, I think that people listening are gonna be very curious about that, too. So, 
+
+00:22:57,199 --> 00:23:33,379 [Speaker 3]
+can you share a little bit what, uh... You, you already said a little bit around it with the tooling and the frameworks and people going to production. Can you... Can you share a little bit more about the design choices that you've made. And of course, and, and as, as Connor said in the beginning, we're super, you know, happy and proud to partner with, uh, with all of you on this... On, on the, uh... on this project. But I, I, I, I would love to understand, like, the design choices you've made, what you think is important, um, uh, es- especially from a SaaS perspective for the, for the end customers. And, and, and of course, we also would always love to learn, like, what you, what you like and enjoyed in, in building with our, uh, technology.
+
+00:23:34,600 --> 00:25:22,568 [Speaker 3]
+ Yeah, sure. So, we, we, we did try and be deliberate about our design choices. So, there were... There was, like, some keywords that I would, I would throw and talk about. So, we wanted to ensure that flexibility is one of our key design principles. So from the flexibility... I mean, it, it, it manifests in multiple forms. So one flexibility aspect is, we will let you deploy this where your data is, right? So whether that's in, in, in your cloud, whether that's on-prem, so, so we wanted to make sure that we, we support that. Two, we... In our pipelines, uh, when we are, like I said, preparing data for RAG is a non-trivial task and we wanted to make sure that was-That was handled with flexibility in mind. So we allow you to- allow you a choice of embedding models. Um, so, you know, whether... You know, we- so we bundle a set of embedding models, but we also, um, will shortly allow you to bring your own embedding models. And, and from that perspective, we are completely, I mean, transparent. We're open to, like, bring your LLM, bring your vector database. Although we have first-class integrations, but, like, if you want to choose a different language model provider, or different vector database provider, we respect that choice, right? I mean, that is as... Because we are dealing with enterprises. And in many cases, they already have a perspective that I have a partnership with XYZ, so you got to be able to work. So we, like, yep, we will, we will align to that. So that flexibility is an important principle. We really wanted to make sure that trustworthiness is a core element of this thing. Whether that's having a human kind of designing this workflow, whether that's the ability to design your own evils, or have an LLM generate an evil but you review it, and then you see the scores. And we actually follow this 
+
+00:25:22,568 --> 00:26:07,428 [Speaker 1]
+kind of a concept of a champion-challenger tournament type of a thing. So you can design multiple pipelines that convert your text data into embeddings. And then, you know, using your evils, or an LLM-generated evils, we allow you to score them. And you see, like, you know, at least... So the... on, on, on, on its own, let's say a number might not make sense, but compared to each other, the numbers will tell you something. So there is some quantitative basis now for you to c-... Like, okay, this pipeline using this embedding model and that chunking strategy does seem to perform better. So I am able to have some a- assurance that, you know, it's a good, reliable, trustworthy pipeline. So I will choose that. I talked about the citation. So trustworthiness was, was really important for this. 
+
+00:26:07,428 --> 00:26:24,128 [Speaker 1]
+The third thing I would say is the time to value aspect. So, we saw people struggle with this thing. You know, like, it, it took ages for them to get this thing up and running, and they were still... looked like, you know, there's some tape and straw kind of holding this together. So we wanted to make sure that 
+
+00:26:24,128 --> 00:26:31,787 [Speaker 1]
+the user interface was, was no code. And that's a challenging task, because this thing is 
+
+00:26:31,788 --> 00:27:12,908 [Speaker 1]
+non-trivial. I mean, there are settings and, you know, configurations that, that are just part of the... inherently this pipeline. So we wanted to kind of make sure that we allow you to make choices, but also have intelligent defaulting so that, you know, you can, you can move fast where you need to. But having the ability to kind of go from, you know, documents to embeddings within minutes using our interface, there's a time to value aspect that we wanted to keep in mind. Um, the last one I would, I would say is performance, because some of these workloads could be compute-intensive. Um, so there is a... You know, there's obviously a latency aspect to it, there's also, like, you know, how much infrastructure do you, you utilize? So we, if, we, we have some architectural 
+
+00:27:12,908 --> 00:27:30,528 [Speaker 1]
+patterns that we utilize to gain acceleration even when you are running on an infrastructure that's not accelerated. Uh, so you may not have GPUs in the infrastructure, but we can still gain acceleration, uh, due to some design choices that we made. So I think those were, like, our top 
+
+00:27:30,528 --> 00:27:36,288 [Speaker 1]
+design principles, and I think we've tried to really closely align with them. 
+
+00:27:36,348 --> 00:27:48,148 [Speaker 3]
+Yeah. That, that, th- th- that... Uh, all of that makes it, makes a ton of sense. And that is a... That's a... By the way, that's actually another thing where we, where you could actually say, like, that things haven't changed, right? So that- 
+
+00:27:48,148 --> 00:27:48,157 [Speaker 1]
+Yes 
+
+00:27:48,157 --> 00:28:12,528 [Speaker 3]
+... time to value those... Th- that is just unchanged. And I think one of the things that I always find so, so fascinating, for example, um, if we, if we, um, uh... What we see, for example, with, with Weaviate, is the... I'm fascinated by the developer experience of, like, the clients. Um, um, so remind me again, which, which language are you guys, say, using again for the integrations? 
+
+00:28:12,528 --> 00:28:16,967 [Speaker 1]
+So we use, um... So all of the backend that we have is mostly Python. 
+
+00:28:16,967 --> 00:28:17,187 [Speaker 3]
+Yeah. 
+
+00:28:17,187 --> 00:28:26,487 [Speaker 1]
+Our front end is, is React, but, you know, that's, that's especially in this product. We also use a lot of Go in our backend and, and just in broader, broader company. 
+
+00:28:26,487 --> 00:28:33,368 [Speaker 3]
+Yeah, but... So Python is a great example, because I think it's safe to say that Python is like the lingua franca of, of, of- 
+
+00:28:33,368 --> 00:28:33,587 [Speaker 1]
+Yes 
+
+00:28:33,588 --> 00:29:03,628 [Speaker 3]
+... AI, uh, nowadays. And what I find so fascinating also, if we look at the, at the Weaviate client, is like it's... We call it the Weaviate client, but it's actually not a client anymore. It's like more like a... It's like a library almost. It doesn't feel like that you're interacting with, with database, in my mind. Maybe you have a different point of view on this. But it's like, where you had, like, back in the days, like with, with SQL, that you were, like, literally writing SQL in the- 
+
+00:29:03,628 --> 00:29:04,038 [Speaker 1]
+Yeah 
+
+00:29:04,038 --> 00:29:15,558 [Speaker 3]
+... code. And then you had that new generation that, of course, came with, with NoSQL, um, where you were still connecting drivers and stuff to a database. 
+
+00:29:15,558 --> 00:29:15,568 [Speaker 1]
+Yeah. 
+
+00:29:15,568 --> 00:29:24,087 [Speaker 3]
+And that's now kind of changing, that it feels almost like it's just a library. Oh yeah, and by the way, that offloads stuff to models and to a database. But it's... I just- 
+
+00:29:24,088 --> 00:29:24,266 [Speaker 1]
+Yeah 
+
+00:29:24,268 --> 00:29:30,268 [Speaker 3]
+... I find it fascinating how that... the way that we write, uh, software is, is changing. 
+
+00:29:30,268 --> 00:29:48,668 [Speaker 1]
+Yeah, I 100% agree, right? So, I mean, I think abstraction is, I think, the key, key theme here that has emerged in, I would say, the last few decades. So I started as a programmer, and I started programming in C. And I still have nightmares when I think about the memory management that, that I would- 
+
+00:29:48,668 --> 00:29:48,678 [Speaker 3]
+[laughs] 
+
+00:29:48,678 --> 00:31:15,760 [Speaker 1]
+... almost always mess up. And then I find that, you know, there is some memory leak, and then you would need this... some expert to be able to kind of review my code and find, like, you know, this is where you missed it. Um, so I think we've made, uh, a lot of, uh, progress, um, from that perspective. So, yeah, I, I absolutely agree. I think the abstractions that have been created, you kind of have similar looking endpoints, similar looking libraries. I think they go... They have gone a long way in democratizing this. Um-I mean, I think there is still... I mean, I still have, you know, people on the team who are, like, extreme C++ experts. And when there is time to design this, like, really, really important mission critical performance stuff, you're going to do it in C++. But a lot of the software doesn't necessarily need that. And the democratization and abstraction has, has really helped. Um, and I- I want to go back to the previous question. You asked me about, uh, you know, how I think we started working together, going through the design principles. I never answered that part of it. So when I think about, you know, obviously flexibility was important to us, but we wanted to make sure that... And the flexibility also has its cost, right? If you make something too flexible, like, okay, I have to make choices for everything now, right? So we wanted to offer the flexibility, but we wanted... We were very clear that we'll have some first-class integrations that we will start with, right? So we, we started to look at, you know, options with the vector database options, and 
+
+00:31:15,760 --> 00:31:40,930 [Speaker 1]
+you guys were, were a- an extremely good fit for what we were trying to do because obviously we wanted to offer a first-class vector database experience, and- and you guys have that. And two, the- the ability to, you know, kind of spin up in the cloud, spin up on-prem. I mean, that, that just totally aligned to, you know, what we were trying to do. And then, I guess I have to give shout-out to- to your team, Bob. I mean, you guys have been amazing, right? So working with, uh- 
+
+00:31:40,930 --> 00:31:41,640 [Speaker 3]
+Thank you 
+
+00:31:41,640 --> 00:32:09,760 [Speaker 1]
+... Joby and Erica. I mean, they- they're, they're like a dream team. They're connected with, uh, my engineering team. Um, and you know, they talk to each other. They, they presented at conferences together. So I think it, it, it has really, it has really evolved, you know, very organically in, in terms of... Like, sometimes we've had these partnerships which are still quite, uh, abrupt here and there. But this has been... You know, it's flowed really naturally. So I- I- I appreciate your team for that. 
+
+00:32:09,760 --> 00:32:20,040 [Speaker 3]
+Oh, that- that's very kind of you to say, and I think i- it's a... From everything I heard, it's actually... It's, it's, it's mutual. So it's like a, uh... It was just... It's a great partnership, and I think 
+
+00:32:20,040 --> 00:32:53,600 [Speaker 3]
+what's also so important is that us, as a, as a, as a, as a company in such a new space, we're also learning, right? So we need to have that feedback from people like, "What's working? What's not working? What do we need to improve?" And those kinda things. And that's a... That was super... Th- th- super valuable. So that... We- we appreciate that a lot, actually, in the, in the, uh, collaboration. So that's, uh, that's, that's very kind of you to say. So, so what's, uh, what's next? What's, what's on... What's the plan with the platform? What, what... Where are you guys going? What's the, what's the plan? 
+
+00:32:53,600 --> 00:33:37,000 [Speaker 1]
+So the plan is to... You know, we have a lot of... So we just went GA with this product that we call SaaS Retrieval Agent Manager. And because we like an acronym for everything, we call it RAM. So we- we just went GA a couple of weeks back, and we have, uh, a lot of interest. Uh, I'm starting to see a fair bit of interest. So we... Primarily in the enterprise space, so large government, um, entities, healthcare, life sciences, manufacturers, banks that have interest in this. So I think what's next is, how do we convert this interest into some meaningful engagements that drive value for them and revenue for us? Um, so that's, that's really what's next. We're really trying to kind of... Because 
+
+00:33:37,000 --> 00:35:39,120 [Speaker 1]
+I think there's obviously a lot of noise, uh, you could call it hype about it. But there are not a whole lot of patterns or, like... You know, I have this enterprise use case where we have scaled this, right? So I think at some level, everybody's still learning to, right? And that's, that's fine. I mean, that's how it's meant to be. Um, so we are, we are also learning, um, you know, finding that... You know, look, people... Sometimes, you know, I'm demoing, and I find out that the kind of question I get is not about this fancy embedding model and look how easy it is to create, but it's about what is the cost to deploy this? Like, okay [laughs], let me go back and talk about that first. So we are starting to kind of think about more, just more pragmatic... Like what does an implementation look like? What is the total cost of ownership? What are the day-two steps right after I have started? So really kind of going back to the... And that, again, that has not changed, right? Kind of going back to our initial set of questions, that is still a, a key concern of, like, what's the total cost of ownership and things like that. So really what's next for us, I think are, are, are three things. One is, like, really focusing on converting these, uh, you know, interest into pipelines that we can then engage on. Two, I think we're trying to enable, uh, both internally and externally. So we are, you know, working with a partner ecosystem that allows us to kind of go fast. And three, this space is moving fast. So, you know, it... Just because you just went GA does not mean that you can sit for three months and just see what happens, right? So we are also managing a very active roadmap in terms of, like, you know, what's next on the roadmap. So there is... There's some areas where, you know, we have a customer request, like you ought to support this. I'm like, "Okay, that can be added to the roadmap." Some are a little bit more esoteric and they require research, so we are kicking off research, um, streams for that. So I think that's, that's, that's kind of what next. Uh, there is still a fair bit of building left, but I think we have enough that can engage the market. 
+
+00:35:39,120 --> 00:35:49,580 [Speaker 3]
+Yeah, and it's... So this is also something... You, you, you, you touch upon something super interesting, and it's okay. I was actually discussing this with somebody actually today. Um, um, 
+
+00:35:49,580 --> 00:36:13,480 [Speaker 3]
+I believe that the term that's often used for it is like the curse of knowledge. It's like if you work in this, this space for so long with so many things, you just... All these assumptions you make about like, you know, did, did people think about this? Did people think about that? And do they understand that... And then when you talk to people who're just excited about it, that as you mentioned, that they just ask 
+
+00:36:13,540 --> 00:36:35,144 [Speaker 3]
+really basic questions, right? So it's like a... And that's a, uh... And, and I sometimes, I find it so hard, but I'm curious if you have thoughts on this because...I do think it's fair to say that it's, that it's still early in the sense of, like, building with AI. But sometimes I feel 
+
+00:36:35,144 --> 00:36:41,584 [Speaker 3]
+it's even way more early than we might think, right? So, so it's like a, um, 
+
+00:36:41,584 --> 00:36:54,564 [Speaker 3]
+in the early days of the, of the web or something, right? Where, um, uh, uh, that we sometimes think that with, with AI, we're actually already in the time that, uh, uh, Amazon.com is, uh, released to- 
+
+00:36:54,564 --> 00:36:54,574 [Speaker 1]
+Yeah 
+
+00:36:54,574 --> 00:37:03,364 [Speaker 3]
+... to make that analogy. But that actually it's even still earlier. That we're still, like, in the pre-, the, the pre-Google days, to stay in that, uh, analogy. 
+
+00:37:03,364 --> 00:37:03,684 [Speaker 1]
+Yes. 
+
+00:37:03,684 --> 00:37:15,964 [Speaker 3]
+I'm just curious how, how are you ... What do you think about that? How ... In, if you try to compare that, for example, with the early internet or those kind of things, how, how, how ... Where do you think we are? 
+
+00:37:17,844 --> 00:37:24,784 [Speaker 1]
+Uh, so I think we are, we are early. Um, I would say that we are early in the ... 
+
+00:37:24,784 --> 00:37:35,554 [Speaker 1]
+Like, I, I'm, I have to really scratch my memory for the early internet days. But there was that early internet time when I remember, uh, somebody ... You know, you remember the bookstores that, that used to be there. 
+
+00:37:35,554 --> 00:37:35,584 [Speaker 3]
+Yeah. 
+
+00:37:35,584 --> 00:38:26,424 [Speaker 1]
+And they started to get replaced with the, with the online stuff. So I think at, at that time, nobody could project, right? I mean, it, it was still somewhat of an organic displacement that was starting to happen. And nobody could project that how disruptive this could become, right? I mean, there, there were industries that were wiped out, right? I mean, there were, like, bookstores that just closed forever. We might be just around that time, right? Because we don't know how disruptive this can be and what job functions would fundamentally change, what companies may no, no longer exist, what companies may actually prosper and thrive. So, I think we might be even at that early stage. And I think I'll likely go one extent beyond that. And what is challenging is that ... So when that was happening, 
+
+00:38:26,424 --> 00:39:15,884 [Speaker 1]
+that was the only thing that was happening in that space. But here what's the problem is that the, the consumer adoption has happened quite fast, right? Again, the B2C aspect. So you are ... You have these enterprise companies and you have these executives that are, that are under pressure right now. Like, "What's my AI strategy? What am I doing with agents? How many agents do I have deployed?" All right? So it has become a little bit of, like, you know, "I need to do something about it as a, as a technology enterprise leader," as opposed to, like, you know, again, just going back to the fundamentals, you know, where do I need it? What workflows can be accelerated? Where does it fit, where it is not? So sometimes I think that is kind of just accelerating this, this, th- this rush to get on the bandwagon, which is making this 
+
+00:39:15,884 --> 00:40:13,524 [Speaker 1]
+early even look even harder, right? The fact that they're missing that it is early and sometimes it will take time to, to get to the right patterns. But because that there is, again, 700 million weekly average users that ChatGPT has, like, you know, how do I get some of that goodness in my enterprise use cases? So I think we are pretty early from the perspective of how much disruption can happen. But it is quite challenging given the, the massive adoption that has happened in the B2C space. And it is also challenging because some of the employees in these companies are using that, right? I mean, productivity tools are just there, right? So if ... I mean, obviously most of us are using that. And for them to be not able to just connect the dot, like, you know, how can this unlock my, my business use cases, uh, is a pain point, right? And that is making this, this early even more challenging. 
+
+00:40:13,524 --> 00:40:35,324 [Speaker 3]
+Yeah, that's, that's, that's a good, that's a good point. I, I think ... But this is also something that's not new for AI. Like, if you look, for example, back to the, to the, to the, to the, to personal computer, it was not the computers that people were working, uh, using at work that they wanted to use at home. It was the stuff that they were using at home that they wanted to use at work. 
+
+00:40:35,324 --> 00:40:36,004 [Speaker 1]
+Yes. 
+
+00:40:36,004 --> 00:40:44,893 [Speaker 3]
+And, and that's kind of what we see now with AI as well. It's not the fancy, you know, models that are running somewhere and it's, "Oh, would be nice if I could do it at home." No, no, no. 
+
+00:40:44,893 --> 00:40:44,903 [Speaker 1]
+Right. 
+
+00:40:44,904 --> 00:40:54,844 [Speaker 3]
+It's like a ... That, that ease of use of using the general-purpose models at home that they want to bring that to their, uh, to, to, to their work. And, and that is a- 
+
+00:40:54,844 --> 00:40:54,854 [Speaker 1]
+Exactly 
+
+00:40:54,854 --> 00:41:02,614 [Speaker 3]
+... I think that's a very good signal that we, that we see that, uh, that that's happening. This is ... Oh man, thi- this has been fascinating. So, uh- 
+
+00:41:02,614 --> 00:41:02,614 [Speaker 1]
+Yeah 
+
+00:41:02,614 --> 00:41:17,004 [Speaker 3]
+... last but not least, if people listening are curious and, and, and maybe working in the enterprise and they're like, "Hey, we wanna, you know, we wanna start to, to, to, to tinker around with, uh, with this new, uh, SaaS platform," where, where, where do they go? Where they ... How do they reach out to you? 
+
+00:41:17,004 --> 00:41:39,484 [Speaker 1]
+Yeah. No, that's, um ... That's a good question. So I think there's many ways to connect with us. I mean, saas.com/ram is the starting point. It's rather simple. Saas.com/ram gets you started in terms of, you know, what the product is about. Uh, I am, you know, on LinkedIn, so you can look me up, Sourabh Mishra SaaS. Uh, I think there's only one with those combinations. 
+
+00:41:39,484 --> 00:41:40,524 [Speaker 3]
+[laughs] 
+
+00:41:40,524 --> 00:42:07,884 [Speaker 1]
+So, you can find me pretty easily there if somebody's interested. And I'm always, uh, happy to connect and, you know, talk about, uh, what we can do. Uh, like I said, I mean, I think this is a ... There's still a lot of learning to do, so we are, we are in it together. And, you know, we're uncovering new patterns and, and new questions every day. And I think this is ... I mean, there's ... You know, we talk about challenges and all of that, but this is also just, like, super interesting time. This is like, you know, one of the best times to build, right? 
+
+00:42:07,884 --> 00:42:07,924 [Speaker 3]
+Yes. 
+
+00:42:07,924 --> 00:42:28,244 [Speaker 1]
+I mean, if you think about it. So I am ... I'm really thrilled with what we have built so far. And, you know, m- like we talked about that the space moves fast, so we cannot be, like, sitting on this, so we are building already the next layer of, you know, what way this goes. And really, really grateful for the, for the partnership that, that we have. 
+
+00:42:28,244 --> 00:42:49,594 [Speaker 3]
+Fantastic. Well, thanks. Oh man, wasn't this great, Connor? Yeah. Yep. Yeah. [laughs]  Yeah, thanks so much, Sourabh. This was, this was great. We, we love to have these conversations. We, uh ... Which, what, where, what, which number are we in, uh, when it comes to podcasts now, uh, Connor? Which, which, which number wi- will this be? 129. [laughs] 
+
+00:42:49,594 --> 00:42:50,114 [Speaker 1]
+129. 
+
+00:42:50,114 --> 00:42:52,324 [Speaker 3]
+129 podcasts. Yeah. [laughs] Yes. 
+
+00:42:52,324 --> 00:42:54,144 [Speaker 1]
+Wow. You guys have been cranking. 
+
+00:42:54,144 --> 00:43:17,484 [Speaker 3]
+Yeah. Yes, we have had builders, scientists, startups, enterprises, you, you, you name it. It's like a, uh ... And it's like ... And, and, and, and Connor is running the podcast for so long already. It's like, it's fantastic. And it was absolutely amazing that I, uh, could join you, uh, Sourabh, to, uh, you know, to talk about ev- the great stuff you're building on, on, uh, uh, at SaaS with Ram. So that's great. 
+
+00:43:17,484 --> 00:43:48,203 [Speaker 1]
+Yes. No, likewise. I, I appreciate the opportunity. And I think, uh, we are looking to kind of get some customer wins now. And our, our goal is to kind of make sure that we are able to connect the dots. So, so working with your team, trying to make sure that we are able to kind of bring them in, provide the appropriate support that they, that the customers need. And, you know, kind of just going back those still new space, still new technologies at some level. So I think there's, there's a lot of room for us to kind of continue to partner in the future. 
+
+00:43:48,203 --> 00:43:52,453 [Speaker 3]
+Fantastic. Thank you so much. This was, this was great. [laughs] 
+
+00:43:52,453 --> 00:43:55,784 [Speaker 1]
+Thank you. Yes. No, I enjoyed it. Thank you for the opportunity and, uh, have a good one.
