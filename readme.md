@@ -15,3 +15,8 @@ An MCP server for the Weaviate Podcast!
 [130] REFRAG with Xiaoqiang Lin
 - [YouTube](https://www.youtube.com/watch?v=yi7v-UXMg0U)
 - [Spotify](https://spotifycreators-web.app.link/e/TMG3ILtSUYb)
+
+[129] Weaviate and SAS with Saurabh Mishra and Bob van Luijt
+- [YouTube](https://www.youtube.com/watch?v=INKV21AaYjE)
+- [Spotify](https://spotifycreators-web.app.link/e/bBjTtMtSUYb)
+
