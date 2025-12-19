@@ -20,3 +20,6 @@ An MCP server for the Weaviate Podcast!
 - [YouTube](https://www.youtube.com/watch?v=INKV21AaYjE)
 - [Spotify](https://spotifycreators-web.app.link/e/bBjTtMtSUYb)
 
+[128] Weaviate's Query Agent with Charles Pierse
+- [YouTube](https://www.youtube.com/watch?v=TRTHw6vdVso)
+- [Spotify](https://spotifycreators-web.app.link/e/bt9QUMtSUYb)
