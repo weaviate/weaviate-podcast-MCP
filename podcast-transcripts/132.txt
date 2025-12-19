@@ -1,0 +1,677 @@
+00:00:00,160 --> 00:00:26,340 [Speaker 0]
+Hey, everyone. Thank you so much for watching another episode of the Weaviate podcast. I'm super excited to welcome Thomas van Dongen, the head of AI engineering at Springer Nature. Thomas is also the creator of Pyversity, a super exciting open-source Python library for diversity in embedding space and all these interesting applications from search results, recommendation systems, I think just open-ended discovery more broadly. I'm really interested in this library and so excited to discuss it with you, Thomas. Thanks so much for joining the Weaviate podcast. 
+
+00:00:26,340 --> 00:00:29,600 [Speaker 1]
+Hey, Connor. Yeah, thanks for having me. Love to be here. 
+
+00:00:29,680 --> 00:00:37,060 [Speaker 0]
+Awesome. So, uh, can you set the stage for our audience and just kinda, maybe just explain this concept of diversity and... Yeah. 
+
+00:00:37,060 --> 00:01:03,380 [Speaker 1]
+Yeah, that sounds good. Yeah, so I think, um, you know, um, retrieval systems, they usually optimize for relevance, right? We're basically looking for... Given a certain query, we're trying to find the right document. And this works really well. Uh, but in many production use cases, you're not just looking for the single perfect document. You're sort of exploring this space, right? So if we take the e-commerce space, for example, um, we might be looking for new shoes, and I don't wanna see the same shoes 10 times. Um- 
+
+00:01:03,380 --> 00:01:03,560 [Speaker 0]
+[laughs] 
+
+00:01:03,560 --> 00:01:22,980 [Speaker 1]
+And that's where diversification comes in. Uh, it's something that's, I think, not often talked about, or at least not talked about enough. Um, but it's actually quite easy to implement in a retrieval pipeline. And that's what I've sort of tried to make with, uh, Pyversity, this lightweight Python library that gives you these tools to diversify your retrieval results. 
+
+00:01:22,980 --> 00:01:43,280 [Speaker 0]
+Yeah, and I can't wait to dive into the technical details of these different diversification strategies, maybe starting from this maximal marginal relevance. And then there are [laughs] all these other ones that I just really am excited to get your perspective on to understand which one should I use, what are the trade-offs to them. But maybe if we could just even motivate the application a little further. Uh, I'm really curious as to kind of what brought you to be working on this. 
+
+00:01:43,280 --> 00:01:52,020 [Speaker 1]
+Yeah, it's a good question. So, um, well, the reason I made it is because I was implementing maximal marginal relevance for the 10th time in- in the production system, basically. 
+
+00:01:52,020 --> 00:01:52,730 [Speaker 0]
+[laughs] 
+
+00:01:52,730 --> 00:02:36,240 [Speaker 1]
+I- I've been using this- this algorithm a lot in my work over the years, and I've been re-implementing it and, you know, r- rewriting tests for it and making sure that it actually works and scales. And I was thinking, you know, is this implemented in some library? And then I started looking, okay, I cannot find a library that does this. Maybe I'll build something called PyMMR or something. And then I got really interested in this field of diversification and sort of started- sort of diving into the literature. And then I found out that there's a lot more out there and actually a lot more recent algorithms, uh, compared to MMR, which is from 1998, if I'm not mistaken. It's already quite [inaudible], um, and then I started just implementing some of these, testing them for some of my own use cases. And yeah, that- that's how Pyversity was born, I guess. 
+
+00:02:36,240 --> 00:02:43,200 [Speaker 0]
+Yeah, maybe... Yeah, so I'm definitely... Hearing that MMR is from 19, uh, 98, was it? Or was it '88? But hearing that- 
+
+00:02:43,200 --> 00:02:45,980 [Speaker 1]
+Nine- yeah, 1998. Yeah, it's quite old. 
+
+00:02:45,980 --> 00:02:46,920 [Speaker 0]
+Okay [laughs]. 
+
+00:02:46,920 --> 00:02:46,960 [Speaker 1]
+Yeah. 
+
+00:02:46,960 --> 00:03:30,620 [Speaker 0]
+I- I think like, kind of like BM25 has like the RM3 or the, like, these pseudo-relevance models that are like '80s. And see, I can't wait to hear about the evolution of that. But I- it- maybe just a little further into the use cases, um, I guess for me, I'm really interested in it from, uh... I'd interviewed Nandan Thaker who developed this dataset called FreshStack that was measuring like coverage of search results. And this kind of idea of one... It's not just a relevance ranking, you wanna have diversity directly in the embedding space. And that's maybe how I- how I personally s- first started thinking about this kind of diversity in search. Um, maybe... Would you mind just maybe expanding a little more about your use cases that have you, you know, re-implementing MMR for the 10th time? How- how often are you coming across this application? 
+
+00:03:30,620 --> 00:04:16,220 [Speaker 1]
+Yeah, definitely. So, so I come from a background of, uh, scientific literature for Springer Nature, which is a large scientific publisher. So we do a lot in the scientific literature space, obviously, you know. We try to help, uh, our users find the right thing to read or to cite for their research that they're working on, stuff like that. And obviously, there's- there's hundreds of millions of research papers spanning from, uh, you know, the 1800s [laughs] even to- to up till now. There's- there's way too many out there. And- and some of these are quite, you know, similar to each other. So, um, why we usually use MMR, um, or something like it in my day-to-day job is to make sure that the user sees this diverse set of results. If they're looking for, "I want the latest research on, um, on machine learning," I don't wanna show them the same or basically the same paper five times. I wanna show them different use case. I want 
+
+00:04:16,220 --> 00:04:16,230 [Speaker 2]
+[laughs] 
+
+00:04:16,230 --> 00:04:33,100 [Speaker 1]
+... to show them computer vision maybe, some from NLP, something on LLM, something more traditional. Um, and that's where we- we usually use it. And then we have, obviously, some parameters we need to tune to actually make it work in production and make sure we don't break the experience for the user or go too far with diversification. 
+
+00:04:33,100 --> 00:04:48,340 [Speaker 0]
+Yes. Maybe one more question about the high level before diving into details of it. Um, I'm curious kind of how you see the line between this diversification algorithm and then, like, outright topic modeling or vector space clustering. Like, kind of just your mental model of where the line is drawn. 
+
+00:04:48,340 --> 00:05:33,900 [Speaker 1]
+I think they're quite similar. Actually, there's one algorithm in Pyversity that I see as a clustering algorithm. I- I think the, um... That these algorithms, what makes them really useful compared to clustering algorithms is that they're quite fast, you know. Many clustering algorithms scale, uh, quadratically with the size of your dataset, um, and that just makes them infeasible to use. You know, if you have a use case where you're hitting a thousand queries per second and you have your users, uh, just slamming the system and you wanna diversify in real time, you need something that can scale, uh, linearly, not quadratically. And I think that's- that's where I sort of draw the line, you know. If you have this bandwidth and you can do clustering, then I think there is a- a real use case there, and you might wanna do real-time clustering. But I think in many use cases, you need something that's just faster, and that's where something like Pyversity can help. 
+
+00:05:33,900 --> 00:06:17,440 [Speaker 0]
+Oh, that's fascinating. I hadn't thought about that before. I've- I've been, like, um, thinking ab- a lot about, like, how does vector space clustering come up as a product. And maybe you have, like, kind of like something that's cataloging your data and it's kind of offline, and it's like organizing your data without you, you know, actively querying it. And- and that's maybe one way of thinking about this kind of vector space clustering. And then there's another one that's maybe like the semantic group by, or you're like clustering on the fly with new queries. And that's maybe more so where I see this, and yeah, it's super interesting. Awesome. So maybe we can now start, uh, you know, unpacking the tech and talking about... Yeah, I think that that kind of discussion of the quadratic complexity is maybe a good place to start. Or just, if we could just kinda take down like, maximal marginal relevance, like, how particularly does this work?
+
+00:06:18,320 --> 00:07:26,800 [Speaker 1]
+Yeah. Yeah, that sounds good. So I think this is the- the best one to start with. It's the oldest and it's also the easiest to understand. So maximal marginal relevance, it's- it's in the name. Um, it gives you the item that's, um, um, has a certain distance to the most similar items that you've already selected. So let's just go back a- a step first. And we always have the assumption that we've already selected some items, right? Like in... If- if we just have a single item, that's always the most relevant and the most diverse item. So we- we always start with the second item and the third, and we iteratively try to build out the set that we can then, um, show to a user or give to an LLM. Um, and in the case of MMR, what we're basically, uh, saying for every new item is, um, you need to be, uh, as far away as possible from items... From the most... The item that you're closest to that we've already selected. Um, so basically, you're trying to invi- avoid near duplicates, I guess is the easiest way to put it. Um, and then you have this gamma parameter, or I- I just call it diversity in the package to sort of unify it in a single API, that gives you, uh, this, um, yeah, this balance between how diverse do I want it to be or how, uh, relevant do I want the result to be. 
+
+00:07:26,800 --> 00:07:44,600 [Speaker 0]
+And that was my first kind of instinct to start playing with that diversity parameter. I had a collection of texts about like, uh, NBA facts and NFL facts, and the query is like, uh, "Who's, like, the most accomplished player?" And then it just sorts it. But then when you add this diversity, you get like the alternating NBA, NFL, and that... It's just, like, kind of how I started [laughs]- 
+
+00:07:44,600 --> 00:07:44,810 [Speaker 1]
+Yeah 
+
+00:07:44,810 --> 00:07:55,730 [Speaker 0]
+... learning about it. But, um, I- I guess, um, yeah, so understanding, I think, the difference between maximal marginal relevance and then, like, maximum of distances is maybe like how you're computing the set- 
+
+00:07:55,730 --> 00:07:55,740 [Speaker 1]
+Yeah 
+
+00:07:55,740 --> 00:08:04,140 [Speaker 0]
+... and then, like, how uniqueness is then, uh, scored based on, like, this entire set or maybe just, like, the most recently selected item. Uh, c- 
+
+00:08:04,140 --> 00:08:46,700 [Speaker 1]
+Yeah, that- that- that's correct. Yeah, they're- they're very similar to each other. They actually use the same greedy algorithm under the hoods, uh, with one slight difference, which is that in MMR, you're only looking at the most similar items. So you have your new item and you're basically first checking the similarity to all the items you've already selected, and then the one that has the highest similarity, you wanna be far away from that item. With maximum of distances, again, it's in the name, you're looking at all of these items and you're trying to maximize the sum of all the distances. And the difference there is that this gives you a little bit more spread, a little bit more global spread. I think usually this is what you actually want. Um, to- to be clear, I think MMR is a really good algorithm, but again, it is a little bit dated and there have been 
+
+00:08:46,700 --> 00:09:01,400 [Speaker 1]
+numerous improvements made to it. So I think MSD is something that might... It's the exact same speed, skills, the exact- exact same scaling factors, it just gives you this little bit of extra global spread because you're looking at all your items you've already selected. 
+
+00:09:01,400 --> 00:09:19,370 [Speaker 0]
+Very cool. Uh, so then, um, I see with like... I'm just kind of looking at the list of the implemented diversification strategies in Piversity. I see also, uh, DPP and cover, they both introduce like a quadratic term as well, and, um, would you... I don't know if it's too much of a, like a technical... [laughs] You're gonna recite the articles but, um- 
+
+00:09:19,370 --> 00:09:20,269 [Speaker 1]
+No, we can- 
+
+00:09:20,269 --> 00:09:20,269 [Speaker 0]
+Go ahead. 
+
+00:09:20,269 --> 00:09:32,510 [Speaker 1]
+We can go into it. Yeah, yeah. No, I think those are super interesting. And these are probably the ones I would recommend people use. I, um... You know, when I started implementing this, I was thinking this is gonna be MMR all the way. And then when I started using it, I actually... [laughs] 
+
+00:09:32,510 --> 00:09:32,510 [Speaker 0]
+[laughs] 
+
+00:09:32,510 --> 00:10:56,560 [Speaker 1]
+Um, yeah, I think... So DPP, I think, uh, determinantal point process is what it stands for, I think is what might be most commonly used nowadays. Um, there's this really good paper from Google about the YouTube algorithm, um, and they use DPP for their- for the YouTube home feed basically. That's what you see. If you go on YouTube, your recommendations are diversified using DPP. Um, now, what DPP... What makes DPP a little bit better, I would say, than, uh, MMR and MSD, is the fact that it optimizes for, uh, volume in geometric space as opposed to just distance. Um, so- so... Let's see. The best way to explain it is probably, um, to compare it to MSD, right? So MSD, you look at all your items and you just take the distance to all those items. And whatever your distance metric is, you can have your Euclidean distance, which is the length or the vectors, or you can have your- your- kind of your cosine distance, the angle. But either way, we're only optimizing the single distance metric. Um, and that's what DPP kind of does. It- it says, "I wanna optimize both of these. I wanna optimize for volume." So I wanna take both the length of these vectors and I wanna also take the angle, and I wanna select something that adds as much volume as possible to our existing embedding space, which is what if- we've already selected. Um, so the- so the theoretical guarantees there are just a little bit nicer. Uh, and I think also in production systems, you usually see that this just leads to slightly better results. 
+
+00:10:56,560 --> 00:11:25,440 [Speaker 0]
+Yeah, it's r- it's- it's really interesting thinking about... It's almost like a projection of embedding spaces into these new sets, and it's just really interesting. I- I guess, um, maybe like a quick question I wanted to ask about was, um... M- and well, maybe I'm... or I kinda wanna stay in the technical details before kind of coming out, but I'm interested in kind of these distances and I hear about like non-metric spaces and maybe like a topology of distances. Is- is that maybe a- a useful way of thinking about this? Like, uh... 
+
+00:11:25,440 --> 00:11:25,480 [Speaker 1]
+Yeah. 
+
+00:11:25,480 --> 00:11:27,520 [Speaker 0]
+You can start maybe some... Yeah. 
+
+00:11:27,520 --> 00:11:44,060 [Speaker 1]
+Yeah, I think that makes sense. Yeah, yeah. I think, um, you know, the way I- I usually... I come from a background of AI and NLP mostly, so I usually think in terms of, uh, dense text embeddings and cosine distances. I guess that's mostly my- my thinking model. 
+
+00:11:44,060 --> 00:11:44,110 [Speaker 0]
+[laughs] 
+
+00:11:44,110 --> 00:12:16,050 [Speaker 1]
+Um, I don't have, um... I don't have a formal mathematical background, obviously, but, um, what is nice about most of these algorithms is that they're quite easy to understand, even for someone who doesn't come from a mathematical background. You know, in the- in the case of, um, DPP, for example, it all works based on the determinant of your matrix, which is, which is the volume in geometry basically. Um, and yeah, I think all of these become... It's... Even- even looking at the code, they're quite intuitive to understand, even for someone who doesn't come from a mathematical background. 
+
+00:12:16,050 --> 00:12:22,920 [Speaker 0]
+And then I- I also noticed that like, um, Piversity only has the NumPy dependency, which is [laughs]... I know a lot of software engineers are gonna love that- 
+
+00:12:22,920 --> 00:12:22,950 [Speaker 1]
+Mm, yeah 
+
+00:12:22,950 --> 00:12:24,180 [Speaker 0]
+... not having that [laughs]- 
+
+00:12:24,180 --> 00:12:24,519 [Speaker 1]
+Yeah 
+
+00:12:24,520 --> 00:12:25,640 [Speaker 0]
+... bringing like new- 
+
+00:12:25,640 --> 00:12:29,190 [Speaker 1]
+It's kind of a- kind of a flex. Yeah [laughs]. 
+
+00:12:29,190 --> 00:12:41,086 [Speaker 0]
+[laughs] But... I- i- and that's a part... Is that a part of kind of the-... the design, 'cause like I understand like with per topic you have these like, uh, Numba dependencies. Is that- is that to scale- because it's like not designed to scale it super high, but like, say a computer- 
+
+00:12:41,086 --> 00:12:41,086 [Speaker 1]
+Yeah 
+
+00:12:41,086 --> 00:12:42,476 [Speaker 0]
+...like a matrix determinant. 
+
+00:12:42,476 --> 00:13:04,976 [Speaker 1]
+Yeah. Yeah, exactly. I think if you really, really wanna optimize this, you probably need to add Torch as a dependency, you know, and get something like super optimized and your GPU's there for the- for the heavy operations in there. Um, but this... Yeah, I like making lightweight stuff. I think if you- if your package only depends on numpy, it becomes almost free to- to use anywhere, right? Because everybody has numpy as a dependency. 
+
+00:13:04,976 --> 00:13:04,996 [Speaker 0]
+[laughs] 
+
+00:13:04,996 --> 00:13:25,116 [Speaker 1]
+I don't think there's a single real Python package out there that doesn't have numpy as a dependency. Um, so that makes it kind of easy to plug in. And um, and it is still really, really fast, you know. You can easily scale this to thousands or ten thousands of vectors in real time, um, for- for, yeah, for every user at the same time. 
+
+00:13:25,116 --> 00:14:00,156 [Speaker 0]
+Yeah, yeah. Super cool. And I've already really loved learning that nugget about sort of maybe thinking about the scale of it and the application space and understanding the line. Um, I- yeah, I guess maybe like one other quick thing I was, I- I wanted to kinda ask about... Maybe- maybe even before asking this question, as we round up kind of talking about the difference between maximum marginal relevance, maximum of distances, DPP, cover SSD, I wanted to just maybe ask you if you have a quick, uh, sense of how to prescribe what you might need, like, whether you're building a recommendation system or a search system or you're just exploring your data. It's like how do you- do you have like a quick way of thinking about like which- which one of these should I test first? 
+
+00:14:00,215 --> 00:14:30,746 [Speaker 1]
+Yeah. I- I think a safe default is DPP. I think it's what's most commonly used. Um, the- the default in the package is actually MMR just because it's most, uh, widely known but I might change that in the future because now I know that DPP is actually probably just better all around. It's the same speed, at least if you use the greedy implementation. Um, and by the way, for MMR, MSD and DPP, I've all chosen a greedy implementation, meaning that we don't look at the full dataset but only at the already selected items, and that makes it just really, really fast. 
+
+00:14:30,746 --> 00:14:30,886 [Speaker 0]
+[laughs] 
+
+00:14:30,886 --> 00:15:10,336 [Speaker 1]
+Um, and I think that's what's also commonly done in literature. Um, so I think DPP is a good starting point. You know, it's used by a number of fairly large companies in production. It scales really well. Um, and then I think the interesting ones to experiment with are SSD and COFR, which we've not really gone into yet, but these are the ones that are a bit more niche and a bit more use case specific. But if you just have this generic use case of, hey, I have, um, I have a search feature and I want to diversify my results, then I would say DPP is probably your best starting point. Uh, it's just a little bit more theoretically grounded than both, uh, MMR and MSD. 
+
+00:15:10,336 --> 00:15:11,715 [Speaker 0]
+Yeah, cool. And then- and then maybe just 
+
+00:15:11,715 --> 00:15:12,005 [Speaker 3]
+[clicks tongue] 
+
+00:15:12,005 --> 00:15:22,396 [Speaker 0]
+... I think transitioning right there, eh, especially as you're mentioning getting into the literature of these- of how these algorithms have been presented, um, I'm really curious just like how are these m- uh, algorithms evaluated generally? 
+
+00:15:22,396 --> 00:16:44,156 [Speaker 1]
+Yeah. That's- that's a really good question. So, um, first of all, it's hard to evaluate diversity. Uh, the reason for that is y- y- many of these retrieval datasets that we evaluate on, you know, I usually use, uh, Massive Text Embedding Benchmark and you have the bear datasets there for, uh, retrieval. Many of these you- you cannot, um, evaluate diversity on because you have, um, you know, you have your dataset and then you have pairs of queries and documents. You have a single query and a single perfect document, and then you're trying to find that document and then you measure the recall or the nDCG, whatever your metric is. Um, to measure diversity, we need this set, right? Uh, we cannot measure diversity on a list of one. That's just- doesn't work because it's always [laughs] gonna be diverse and fully relevant. Um, so that already makes it quite tricky. There are some datasets out there where you have, um, one query and you have multiple documents, and there it becomes feasible to, uh, measure diversity. And what you usually do there is try to keep your relevance as high as possible. You- you can never really expect on these datasets at least that you're going to get more relevant results by diversifying because you're essentially just re-ranking these results, uh, for another metric. And I think in literature there's basically two metrics that are most commonly used which is the, uh, the intralist average distance and the, um- 
+
+00:16:44,156 --> 00:16:44,665 [Speaker 0]
+[laughs] 
+
+00:16:44,665 --> 00:17:39,815 [Speaker 1]
+... intralist minimal distance, I think. So [laughs] yeah, off the top of my head, those are the two metrics we use. And those basically say, um, for the- for the ILAD, the intra- intralist average distance we say on average how dissimilar is every pair of selected items. And then the- the minimal case is very similar but there we say what is the closest pair of items in our entire list. Um, so what you usually do in literature is, um, you, um, take your existing benchmark and you try to keep it as stable as possible while increasing these two metrics. That- that's usually what we try to do. So we wanna make our sets more diverse without hurting our performance. Um, so there's this sort of trade-off where you- which you see happening where you would s- sort of see this performance line go slightly down and you see these other lines of- of diversity go way up hopefully. Um, and that- that's the trade-off they're trying to make. 
+
+00:17:39,816 --> 00:17:48,446 [Speaker 0]
+Yeah, so I know like a lot of people in search already, and the nDCG metric is already kinda like a brain teaser, how you have to have like ideal DCG over, you know- 
+
+00:17:48,446 --> 00:17:48,816 [Speaker 1]
+Yeah 
+
+00:17:48,816 --> 00:17:55,545 [Speaker 0]
+... DCG and- [laughs] and it's like exponential waiting and now you've also got these like inter-set distances. It's gonna be like, [laughs] it's just- 
+
+00:17:55,545 --> 00:17:56,295 [Speaker 1]
+It's... Yeah. 
+
+00:17:56,295 --> 00:18:22,956 [Speaker 0]
+[laughs] yeah. I- I- I really- I think like what they did with FreshStack is they just have kinda like coverage so the dataset is Stack Overflow questions and if it's a question like, uh, how do I run Weavier and LangChains like chat with VectorDB, then the ground truth is that you retrieve the docs about LangChains chat with VectorDB as well as like how to set up Weavier with, say, Docker versus cloud or... It's like you have these two like nuggets and it's like nugget coverage. And I think that-
+
+00:18:23,548 --> 00:18:45,348 [Speaker 1]
+Yeah. Yeah, yeah, there is actually this third metric now that I'm thinking about, which is- which is exactly this, this topic coverage metric. And for that, you obviously need to have some label associated with every document that says it's- it- it belongs to this cluster or this topic. And then you ensure that your set represents as many topics as possible. Um, but obviously there, you need these bl- extra labels attached to your documents- 
+
+00:18:45,348 --> 00:18:45,358 [Speaker 0]
+[laughs] 
+
+00:18:45,358 --> 00:18:57,687 [Speaker 1]
+... while these other metrics just work out of the box, you know. If you have some embedding that's- you can compute a similarity to the other embeddings from, then both these metrics just work. That's probably why they adopted it a bit more. 
+
+00:18:57,687 --> 00:19:00,148 [Speaker 0]
+Oh, yeah. So- so that, uh, it's super powerful 
+
+00:19:00,148 --> 00:19:00,608 [Speaker 4]
+[smacks lips] 
+
+00:19:00,608 --> 00:19:53,368 [Speaker 0]
+and I'm also curious about, like, um... So say you have, like, these multi-hop question answering datasets, and then I think, like, evaluating deep... That's kind of what has motivated me to, like, dig this back up, is we're kind of, we're pivoted. Like, in our Weaviate creation, we have ask mode where you ask questions, and then search mode, and now we're releasing think mode and evolving into more, like, more that it can do for you. And then with these kind of multi-hop questions, I'm curious about this diversity in the search result. Because the premise of multi-hop question is sort of like you learn from the first questions. Like, you need to... I think that it's like how many stories were in the castle that David Gregory inherited is like the [laughs] canonical multi-hop question answering example. You need to first understand, like, what castle did he inherit, and then, and then you need, like, you need the name of that to then get the stories. So I- I'm curious if you see this use in multi-hop question answering deep research systems, if you, if that's like a big application for this. Yeah. 
+
+00:19:53,368 --> 00:20:52,228 [Speaker 1]
+Yeah. That's- that's a very cool use case. Um, [smacks lips] I think yes. I think that- that's actually the other big use case we haven't really talked about yet. So the- the- the first obvious use case is this product search, like traditional search, right, where a user tries to find something. I think that the other really cool use case, uh, is- is RAG or, you know, you try to retrieve documents for an LLM to answer some question. And that's the... And that's where I think this becomes really powerful as well. Because there, um, you don't have infinite context. It's expensive to add more documents. Redundancy can actually hurt your system. Um, you can see this in pre-training datasets as well, you know. If there's a lot of redundancy in those datasets, uh, your performance actually degrades. Um, so yeah, I definitely think there's- there's a real use case here for- for this multi-hop question answering as well, because you need this- this broad context without duplication. Essentially, you need to have as compact as possible, um, you know, information for your LLM to process the next question. 
+
+00:20:52,288 --> 00:21:00,508 [Speaker 0]
+Yeah, it's so- so powerful with, like, all the kind of, like, context engineering for agents and the... Yeah, it's just perfect overlap of [laughs] these two technologies. 
+
+00:21:00,508 --> 00:21:00,728 [Speaker 1]
+Yeah. 
+
+00:21:00,728 --> 00:21:28,128 [Speaker 0]
+So I guess I'm also curious... Yeah, so I think that's a really great coverage of the kind of evaluation, which I think transitions then into asking if there are embedding models that are great at re- retri- like, relevance retrieval, but then aren't as good for diversity. Like, maybe, yeah, like Voyage 3-Large, it's the best relevance model, but then maybe Arctic 2.0 or some other embedding model is the best d- diversity or some trade-off. Are you seeing any kind of, like, pattern emerging with the particular embedding models? 
+
+00:21:28,128 --> 00:21:38,808 [Speaker 1]
+Hm, that's a really interesting question. Actually, I haven't thought about that one yet. I was thinking more about in this, this cross-encoder re-ranker space and how they can, uh, incorporate some diversity 
+
+00:21:38,808 --> 00:21:39,168 [Speaker 5]
+Mm-hmm 
+
+00:21:39,168 --> 00:21:39,177 [Speaker 1]
+... 
+
+00:21:39,177 --> 00:21:39,177 [Speaker 5]
+Mm-hmm 
+
+00:21:39,177 --> 00:21:39,197 [Speaker 1]
+... 
+
+00:21:39,197 --> 00:21:39,197 [Speaker 5]
+Mm-hmm 
+
+00:21:39,197 --> 00:22:27,868 [Speaker 1]
+... album, but I haven't really been thinking about how embeddings themselves can incorporate it. I- I think that's, um... You know, because this diversification is so cheap, um, you can probably get away with just taking the- the- the model, the embedding model that has the best performance on- on finding the relevant documents and then diversify after. But you- you could also incorporate it directly into the embedding space maybe. I'm not sure how that would work because you would have to, um, almost introduce some sort of noise to- to ensure that, um, you know, you find a diverse set for every query. Uh, because normally, you expect... All these models are optimized for finding the nearest neighbors, right, to a- to a certain query. You know, the documents that are closest in cosine distance or Euclidean distance, whatever you use during the pre-training of these embedding models. 
+
+00:22:27,868 --> 00:22:45,038 [Speaker 0]
+Yeah, that- that makes a lot of sense. Uh, like, whether you use like triplet loss and you're just kinda pushing pairs with positives or there used to... I don't know if it's as popular, but that kind of like big in-batch contrastive loss, that used to be like, I think back in the early, like, self-supervised learning papers for image representations, that was the popular- 
+
+00:22:45,038 --> 00:22:49,868 [Speaker 1]
+Yeah, your, your... Yeah, this mtext loss or something like that. I remember it, yeah. 
+
+00:22:49,868 --> 00:22:50,067 [Speaker 0]
+[laughs] 
+
+00:22:50,068 --> 00:22:52,588 [Speaker 1]
+Yeah, it was indeed pretty cool. 
+
+00:22:52,588 --> 00:23:10,048 [Speaker 0]
+Yeah. So- so- so that al- that also kind of brings up another question, kind of maybe coming back to Pyversity and the particular interface, is you pass in embeddings as well as scores. And so I- my scores could be my vector distances to the query or- or it could be a re-ranker, like I bring in a cross-encoder. Uh, 
+
+00:23:10,048 --> 00:23:10,278 [Speaker 4]
+Mm-hmm. 
+
+00:23:10,278 --> 00:23:14,028 [Speaker 0]
+Do you mind just like explaining further that- that kind of design? 
+
+00:23:14,028 --> 00:24:12,628 [Speaker 1]
+Yeah, yeah. So basically, this- the scores are- are a metric of how relevant this- this document was to the query, right? We need to embed this notion, because if we don't have scores in there, well, we could just say, uh, it's- it's, um, one, two, three, four, five, so you know their exact same distance. But- but usually I wanna say, um, you know, the first document was a really good match and the second one was a pretty good match and the rest was pretty bad. Um, and- and all of these algorithms try to balance this. That's where the diversity parameter comes in. They try to balance, uh, how much influence do we let our scores have, versus how much influence do we let our minimal distance have or the- the volume we want to add, whatever the algorithm is. There's always this trade-off between those two. Um, so I don't think it really matters, um, where your score comes from, as long as it's an accurate representation of how well this document in particular matches the, um, query that we've used to get to these documents in the first place that we're trying to diversify. 
+
+00:24:12,628 --> 00:24:34,487 [Speaker 0]
+I- I- and I- and I think that then transitions me to be really interested in this kind of like ColBERT and these multi-vector models. I saw there's an issue on Pyversity about, uh, using the Movera encodings as the embeddings, and then- then you don't really diver- uh, divorce the embeddings from the score. You sort of like... Uh, but while still having a super accurate score, I guess is the kind of like 
+
+00:24:34,487 --> 00:24:34,518 [Speaker 5]
+Mm-hmm 
+
+00:24:34,518 --> 00:24:46,964 [Speaker 0]
+... late interaction maxim idea. And yeah, I guess if- if- if... I guess my question would be, if you think about that kind of like keeping the embeddings and the scores...... like, from the same model, if that, if that might be important. 
+
+00:24:46,964 --> 00:25:09,764 [Speaker 1]
+Yeah. Um, I, I think it is important. Well, yes and no. Uh, I mean, the scores needs to represent how well... Again, the scores need to represent how well this document matches the query. Um, I don't think it actually matters that much if they come from the same model, the embeddings and the scores, because, um, under the hoods, we don't... Uh, well, we do use them together, but not in the sense that they need to come from the same model, if that makes sense. 
+
+00:25:09,764 --> 00:25:10,323 [Speaker 0]
+Yeah. 
+
+00:25:10,324 --> 00:26:20,604 [Speaker 1]
+Um, but, but indeed, this, this multi-factor idea is really interesting. I've been thinking a lot about it. You know, when I, um, set up Biversity, I was really thinking about the, the dense embedding, the dense text embedding use case, because that's usually what I use. I have dex- the dense text embedding from some transformer model, um, you know, and I do something with that. Um, but, but it's... Uh, actually extends really easily to other types of embeddings as well. Like, uh, you could do sparse embeddings, which is really high dimensional, so you go embeddings still. You could, you could do matrix factorization in a collaborative filtering algorithm. You know, as long as you have embeddings and you can compare them to each other with some distance metrics, all of these algorithms will just work. Um, but this multi-factor case, yeah, this is something [laughs] I still need to figure out. With Movera, again, you, you, you, uh, you again project into a single vector embedding, right? So then, again, it would just work. Uh, multi-factor embeddings, I'm not sure if it works. Um, I haven't really gone into the literature on this yet. I'm not sure if there even is literature on diversification of multi-factor embeddings. It sounds like a pretty niche topic. Um, but yeah, it would be really cool if, to do something with that as well later down the line. 
+
+00:26:20,604 --> 00:26:52,304 [Speaker 0]
+Yeah, and it, it's cur- it's interesting. Uh, the Movera- Movera is, like, one of my favorite Weaviate features [laughs]. They're always super eager to talk about it, and I think it is really early for Movera. Like, the paper itself from Google has about six citations as of the time of recording this podcast, and yeah, I think it's, it's definitely early. Uh, but, like, maybe coming into it... It kinda is doing this clustering of the multi-vector to project it into the single vector, but yeah, it's really interesting. You have this multi-vector representation that you maybe further interface [laughs] with these diversity algorithms 
+
+00:26:52,304 --> 00:26:52,313 [Speaker 1]
+Yeah. [laughs] 
+
+00:26:52,313 --> 00:27:25,664 [Speaker 0]
+... like, tons of vectors. [laughs] Uh, yeah. So, I guess, like, um, I'm also kinda, like, in, you know, a huge fan of LLMs and natural language algorithms, and so I'm curious if, you know, we have these algorithms like MMR, MSD, DPP. And then this is also kinda something I discussed with Martin Grootendors, who created BERT Topic. And I was asking him about, like, agentic topic modeling and LMs as topic modelers. And so it's like, what if I use an LLM to diversify the space and just... I, I don't... I understand it would probably slow it down quite a lot, but just, yeah, I'm curious if you're interested in that. 
+
+00:27:25,664 --> 00:27:32,353 [Speaker 1]
+Yeah, maybe. So, um, I'm, I'm a big fan of fast, lightweight stuff, so that usually excludes LMs. [laughs] 
+
+00:27:32,353 --> 00:27:32,374 [Speaker 0]
+[laughs] 
+
+00:27:32,374 --> 00:28:02,413 [Speaker 1]
+I think this is one of those cases where, um, you know, you could use an LLM as a re-ranker. But probably, a cross-encoder is just gonna give you the same results and be a bit faster and more specialized. And I think this is kind of the same case. You know, you could ask an LLM, "Hey, here's some documents. Give me a diverse set of documents," but you have zero theoretical guarantees there, right? So you're just relying on the LLM being able to understand this notion of diversity and then giving you back a good set. But there's not, yeah, anything that's, that, that proves that it works. 
+
+00:28:02,413 --> 00:28:02,413 [Speaker 0]
+Mm-hmm. 
+
+00:28:02,413 --> 00:28:17,684 [Speaker 1]
+And that's what I think is, um, a little bit, um, nicer about using something like Biversity. Well, first of all, it's obviously faster and cheaper, but also you have some theoretical, the, um, the guarantees there that you don't get with an LLM. 
+
+00:28:17,684 --> 00:28:36,604 [Speaker 0]
+Uh, 'cause I saw the topic modeling. They have this new algorithm called Topic GPT that's kinda like, um... It's, it's li- 'cause it's, like, embarrassingly parallel, where you can assign, like, a, like, a high-level label to each of the documents in parallel. And then you can kinda group it, and that's maybe how they're approaching it from that, maybe, larger scale topic modeling perspective. And... 
+
+00:28:36,604 --> 00:28:36,824 [Speaker 1]
+Mm-hmm. 
+
+00:28:36,824 --> 00:28:57,604 [Speaker 0]
+Yeah, but I agree totally. It would certainly slow it down to have it be an LLM instead of one of these, like, uh, yeah, distance algorithms. And I did notice, just using Biversity is super fast. And yeah, I guess, that's made me another question. I'm cur- Like, this kinda emphasis on speed, do you think about maybe moving away from Python? Like, maybe it would be, like, a Rust or Go implementation. 
+
+00:28:57,604 --> 00:29:40,364 [Speaker 1]
+Yeah. So I've been dabbling with Rust a bit. You know, for some of my other, uh, open source work. I open sourced a package, uh, last year, uh, which is a Rust implementation of model2vec, which is another package I worked on, um, that's... I- it's, it's super fast, and I actually really love working the language. Uh, the thing is, I'm pretty new to the language, and this is a little more complex than, than just a port of something I've already built. Um, I think, to do it in a really optimized way. So yes, in the future, definitely. But, um, maybe also interesting for someone else who is, who is much more proficient in Rust to, to build a port of this someday. Because indeed, it's, it's, I think it's a very good fit for a language like Rust that's highly optimized. 
+
+00:29:40,364 --> 00:29:54,624 [Speaker 0]
+Yeah, that's very interesting. I guess, like, for me right now, I'm currently thinking that a lot of the bottleneck is in network latency with these things. And well, I'm particularly interested in, like, cloud database products. I'm like, uh, you know, just personally not that interested in, like- 
+
+00:29:54,624 --> 00:29:55,204 [Speaker 1]
+Mm-hmm 
+
+00:29:55,204 --> 00:29:59,844 [Speaker 0]
+... like, millisecond level optimization. Just lately. I, I guess it depends on the scale, but... [laughs] 
+
+00:29:59,844 --> 00:30:38,344 [Speaker 1]
+Yeah, and if you're just adding one millisecond per request with this, it's probably not worth optimizing further. If you can also focus on, you know, the initial retrieval step or the re-ranking step or the reducing the payload sizes and stuff like that, it's probably more worth it than optimizing this single step. Um, but, uh, but it depends a bit on the algorithm, you know. Like we, um, like I said earlier, uh, DPP, MMR and MSD, they're all super fast, but there's also this, this coverage-based algorithm which is, um, which is a lot slower. Uh, for something like that, it might be interesting to do it in a different language because it, it won't scale to hundreds of thousands of vectors. 
+
+00:30:38,344 --> 00:30:42,724 [Speaker 0]
+And, and then I guess it also maybe makes sense to move it to a GPU service, and, um- 
+
+00:30:42,724 --> 00:31:09,403 [Speaker 1]
+YeahI think so, yeah. If you really wanna optimize this, then for sure, you know, a GPU is- is just going to make it much faster. But then you need to rewrite it into Torch, um, which is something I might do in the future. Um, you know, if there's appetite for it, if I get requests from users that say, "Hey, I really wanna use it at- at an even larger scale than it's already, uh, optimized for," then I might add some Torch implementations there to- to make it super fast on a GPU. 
+
+00:31:09,404 --> 00:31:46,684 [Speaker 0]
+Yeah, I- I've been really interested in this since, like, uh, like, NVIDIA has this, uh, Kaggle Vector Index, and just I'm- I'm really curious of this kind of like how you would move your data from, like, your database to these GPU services for things like this. And so with KOVER, it's like, um, maybe if you're scaling up the result diversification to, say, 10,000 results, that's, like, the sweet spot where... And then- and then the- the- the data movement of moving the vectors over to the GPU, or- or if that's even how you design it. Maybe you- maybe the embedding model is also living on the GPU and you're sending just the text and then it's computed over there. 
+
+00:31:46,684 --> 00:31:53,354 [Speaker 1]
+Yeah, I think that- that- the latter is probably a good idea, because, you know, CPU, GPU overhead is pretty- pretty costly, um, so if- 
+
+00:31:53,354 --> 00:31:53,354 [Speaker 0]
+[laughs] 
+
+00:31:53,354 --> 00:32:14,224 [Speaker 1]
+... you already have the GPU there. Um, the memory requirements of this aren't that extreme usually, so you can probably just have those living alongside each other, you know. A- a decently sized embedding model isn't- is a couple of hundred million parameters usually, and then you have something like this living beside it. You can easily fit that into, like, a six- 16 gigabytes or 24 gigabytes of VRAM GPU. 
+
+00:32:15,004 --> 00:32:22,704 [Speaker 0]
+Yeah, that almost triggers me to get into like the whole MCP. Do I wanna be deploying containers [laughs] for every single function I have? 
+
+00:32:22,704 --> 00:32:23,124 [Speaker 1]
+[laughs] Yeah. 
+
+00:32:23,124 --> 00:32:55,964 [Speaker 0]
+Uh, also, so, um, I also wanted to just ask about, I think- I think, well, kind of coming, I'm extremely interested in topic modeling and sort of trying to summarize large datasets, especially like a lot of the vector search story has been like you're searching through, yeah, like, you know, millions of scientific- of chunks from scientific papers. Maybe not even the full papers themselves, as one vector, but I'm curious about, like, using this to- using a diversity algorithm to produce, like, a most representative set of a large dataset and just, yeah, if that- if that problem interests you. 
+
+00:32:55,964 --> 00:32:59,353 [Speaker 1]
+Yeah, awesome. That's exactly what KOVER does. Uh, that's- that's, uh... 
+
+00:32:59,353 --> 00:32:59,384 [Speaker 0]
+[laughs] 
+
+00:32:59,384 --> 00:33:02,572 [Speaker 1]
+I don't even have to explain it anymore. That's literally what it does. Um- 
+
+00:33:02,572 --> 00:33:02,583 [Speaker 0]
+[laughs] 
+
+00:33:02,583 --> 00:34:10,024 [Speaker 1]
+You know ... the KOVER can... It's also why it's a little bit slower. You have this, I guess, we alluded to earlier, there is this quadratic scaling factor with regards to your total dataset. But yeah, what it does, it- it's, um... At a very high level, we try to find the medoids of our dataset if we cluster it, so the end medoids. Uh, where the- the medoid is the actual data point or embedding that's closest to the centroid of that cluster. Um, so this is what KOVER gives you. It's a facility location algorithm that gives you these end points, however many you want, um, that represents your dataset as best as possible. Um, and indeed, this is the one I really like, uh, coming from a scientific background, because in scientific literature search, you really wanna KOVER your space as- as much as possible. It's really important. I think more important than in something like- like e-commerce search, where, you know, I'm usually fine with... If I'm looking for shoes, I don't want to see the same shoes five times, but I'm probably fine with, you know, some- some white sneakers and some black sneakers and just some variations of the same products. Whilst in something like scientific literature search, I really wanna ensure that I KOVER the full fields that I'm, uh, interested in. 
+
+00:34:10,024 --> 00:34:19,764 [Speaker 0]
+Yeah, I had heard, uh, Charles Pierce at Weaviate first introduce me to- to this before I even was working at Weaviate, and he'd call it serendipitous discovery. Like, ser- like, I wanna have serendipity- 
+
+00:34:19,764 --> 00:34:19,924 [Speaker 1]
+Mm-hmm. 
+
+00:34:19,924 --> 00:34:21,034 [Speaker 0]
+... in my search results. Yeah. 
+
+00:34:21,034 --> 00:34:21,043 [Speaker 1]
+Yeah. 
+
+00:34:21,043 --> 00:34:23,373 [Speaker 0]
+And he was also working on the scientific literature. Yeah. 
+
+00:34:23,373 --> 00:34:51,724 [Speaker 1]
+Yeah, very cool. That's- that's exactly where something like diversification comes in. Um, and- and if you don't do something like diversification, even then, uh, then you probably want to add some randomness to your search. I think there's literature that shows that users are just... They wanna explore, right? They wanna get out of their comfort zone and see new things that they didn't expect to find in many, many real world use cases. And that's where something like diversification can really help you, uh, and, uh, give you the serendipity effect. 
+
+00:34:51,724 --> 00:35:26,804 [Speaker 0]
+Yeah, that's awesome. And- and it also, in addition to, like, sort of real data, like scientific papers or e-commerce, I- I love this kind of exploring the output space of large language- large language models and multimodal. This is how I personally got into it. I was designing these gorillas that would have, like, a Weaviate brand, and I had noticed that every time I gave, uh, DALL-E the prompt, it would produce, like, a slightly different robotic gorilla. And so I became just obsessed with thinking about like, "I would love to generate a million of these gorillas and then use one of these diversity algorithms to see like, okay, [laughs] what are the most interesting gorillas in this set?" 
+
+00:35:26,804 --> 00:35:40,804 [Speaker 1]
+Yeah, it's really cool. This- this whole exploration of a- of a- of a space is just, it's so interesting to me. It's something I- I work on a lot at my day-to-day job. You know, how to- how to traverse a certain space. It's- it's such a fascinating problem. 
+
+00:35:40,804 --> 00:35:56,243 [Speaker 0]
+Yeah. Oh, yeah, so cool. Uh, yeah, so maybe I'd love to kinda anchor the podcast by talking a little more about your experience with, uh, scientific literature search. I work a lot with scientific papers as well in my job and I'm just... Yeah, I'd love to just know about what inspires you working on scientific literature mining. 
+
+00:35:56,243 --> 00:36:37,394 [Speaker 1]
+Yeah, I think, um, you know, I- I got interested in this way back in my master's already. I was working on, um- on, um... I was working on my- in my thesis, I was working on predicting the quality of scientific literature. So even there, I was already very interested in this. Um, back then, it was really a scalability problem. Like, we have these full text, very long documents with so much information. How do we even create embeddings from these and learn something from them? That was something I was way, uh, interested in back then. Um, and then it was the chunking was the obvious solution, uh, back then at least. Um, and I kind of stayed interested in this field. I think it's just a really...... cool field to be in because the data is super clean. You know, in many search fields, you just have pretty- 
+
+00:36:37,394 --> 00:36:37,774 [Speaker 0]
+[laughs] 
+
+00:36:37,774 --> 00:37:18,154 [Speaker 1]
+... if you think about like social media, uh, recommendation, for example, you have these very short snippets. They're usually not very high quality. I think in scientific literature, you have, you can expect to have almost the best, highest quality textual data in the world, right? Um, and it just makes it really a, a joy to work on and explore yourself. I think what, what we just talked about, this whole, uh, traversing the space concept, concept is also really fun if you're working with scientific data, because you're literally going through a field of literature, uh, when you're evaluating your own systems. Um, again, if you're doing e-commerce or, or, uh, social media recommendation, then [laughs] it's probably not as fun to go through whatever people are posting. 
+
+00:37:18,154 --> 00:37:18,204 [Speaker 0]
+[laughs] 
+
+00:37:18,204 --> 00:37:27,604 [Speaker 1]
+Might be funny, but maybe not fun, uh, most of the time. But here, I think it's just super fascinating to, to understand the fields with your own system. 
+
+00:37:27,604 --> 00:37:32,544 [Speaker 0]
+Yeah. E- each paragraph has been heavily critiqued [laughs] as some of you were happy. 
+
+00:37:32,544 --> 00:37:33,954 [Speaker 1]
+Yeah. [laughs] 
+
+00:37:33,954 --> 00:38:05,163 [Speaker 0]
+[laughs] Yeah, it's funny. And maybe, uh, even just stepping outside of the, you know, our, you know, going super deep into diversity and embedding spaces, but this kind of maybe just talking about chunking with scientific papers, I would love to just kind of take, take your temperature on that one. Like, um, I'm finding now you can just embed page images either directly as images using these like vision models, like ColPoly, ColQuinn, modern ColBERT. Or even you can... I, I'm not sure if chunking scientific papers still makes sense, because even if you have the OCR, you could, you know, it's like 1,024 tokens is probably- 
+
+00:38:05,163 --> 00:38:05,174 [Speaker 1]
+Yeah 
+
+00:38:05,174 --> 00:38:07,264 [Speaker 0]
+... about what you're looking at. Yeah. Do you... Are you still chunking? 
+
+00:38:07,264 --> 00:38:07,784 [Speaker 1]
+I think it's- 
+
+00:38:07,784 --> 00:38:08,044 [Speaker 0]
+Yeah. 
+
+00:38:08,044 --> 00:39:30,444 [Speaker 1]
+It's, it's starting to change actually, because, um, you know, if you asked me this two years ago, I would have said, yeah, chunking is still the way. But now, you know, LMS can easily process full documents. They can process multiple. Let's say that a scientific document, let's say, is 15,000 to 20,000 tokens on average, we can easily just send that to an LLM. So for LMS, it's, for these decoder style models, it's really not an issue anymore. But even embedding models are starting to get to this sort of very large context window where they can just embed 30,000, 32,000 tokens or something like that. Um, but the qu- the question is, uh, and this is, I think, something that's, that's... Yeah, there was a, I think it was an article by Gina from a couple of years ago about this needle in the haystack and that long context embeddings just don't really work that well. And even if you go beyond like 4,000 tokens, then a mean is just not enough. Um, and that's where I think that this multi-factor concept, again, becomes really powerful. Because I think it's unfair to say, to, to assume that we can just fit an infinite amount of tokens into a mean vector embedding. It's just numerically, it doesn't make sense to me that we could do that, like embed all the information in there, even with the best model in the world. So I think there, uh, you're either going to have to chunk, uh, like we used to, or you have to go to these multi-factor embedding models, um, and, and use those to sort of embed these full papers, but still keep this, this, this low level, uh, token information in your embedding. 
+
+00:39:30,444 --> 00:39:54,253 [Speaker 0]
+Yeah. Uh, a ton of interesting nuggets in there. And, um, yeah, I guess I think Gina... Uh, y- uh, yeah, like the lost in the middle problem for long context embeddings, I haven't seen too many p- you know, works that are really focused on long context. And I think Gina definitely did a great job of like paving the path for that. And but now I do think most of the embedding models just come out of the box with, "Hey, you could pass in long documents if you like." 
+
+00:39:54,253 --> 00:39:54,284 [Speaker 1]
+Yeah. 
+
+00:39:54,284 --> 00:40:05,724 [Speaker 0]
+And, um, and it even makes me question, like I was already thinking like, why do we even need to chunk the pages? Because you can just embed the whole page. But then as you started explaining your perspective, I was like, well, maybe we should embed the entire paper. And- 
+
+00:40:05,724 --> 00:40:05,844 [Speaker 1]
+Yeah 
+
+00:40:05,844 --> 00:40:20,163 [Speaker 0]
+... because then you feed the entire paper to the LLM in that sort of downstream step. So now I'm already like, do we chunk at the page level or is it the whole paper? But then could you even embed a whole paper? Because now you're, now you're really talking about some long context embeddings. 
+
+00:40:20,163 --> 00:41:12,484 [Speaker 1]
+Yeah, indeed. Yeah. And I think the, the reason I think that we don't have a lot of research focusing on this is just benchmarking. You know, it's actually similar to diversification. The reason you don't see a lot of it is because it's really hard to benchmark. You know, if you've, you've probably labeled a retrieval dataset at some point, it's not fun. You know, having to, [laughs] uh, to find 5 or 10 relevant documents for every query, it's a lot of labeling work. And I think with this long context, i- i- it's this, it's the same. You know, if... Um, there is this, I think it's called long context arena or something, which was pretty popular for a while for these transformer models when you were scaling up to more and more co- uh, tokens. But most of it is synthetic. They're not like real tasks. It's really hard to find benchmarks that, that actually use really long documents like scientific literature or even books and have proper labels on them and proper hard tasks to solve where you really need these long context embeddings. 
+
+00:41:13,564 --> 00:41:48,804 [Speaker 0]
+Yeah, I'm, I'm personally a huge fan... Well, I think there's kind of two really interesting things in there I want to talk about, which I, I personally am a huge fan of the sort of like needle in the haystack test where you construct a synthetic question based on the document, and then can you retrieve that source document? But then you mentioned that kind of secon- second thing of like, um, data labeling for retrieval is a pain, and it's because there might be other documents that kind of like match that, that are relevant. And so it's like if you just do that needle in the haystack thing, you miss out on those other relevant documents. But, um, yeah, I, I think there's maybe the critique that like those queries aren't very realistic. 
+
+00:41:48,804 --> 00:41:48,814 [Speaker 1]
+Mm-hmm. 
+
+00:41:48,814 --> 00:42:11,004 [Speaker 0]
+But then I, I don't... Like, I think they are kind of real- like it, because like the LLM is being asked like, could you simulate an information need based on this document? A- and then maybe you then go and you do this kind of like retrieve the 20 search results from this that you would usually call hard negatives and then check that they aren't also relevant. But it's like, so is that query not realistic? Yeah. What do you think about that kind of? 
+
+00:42:11,004 --> 00:42:43,024 [Speaker 1]
+Yeah, it's a good question. I was, I was pretty anti-synthetic data a couple of years ago, but I have to admit, LLMs have gotten really good at it. Um, you know, I think most people have to admit now that LLMs are just pretty good at constructing training datasets, uh, with synthetic data. You know, coming up with queries that are actually diverse and resemble what a user might ask and also finding relevant documents for it. Um, so, so yeah, I think it's, um, it's an interesting research direction, you know, this whole synthetic benchmarking datasets, uh, for LLMs.
+
+00:42:44,228 --> 00:43:02,138 [Speaker 0]
+Yeah, I think there's one that's even worse than that where you're only using LLM as judge. Well, I mean, I'm very guilty. I think this is fine in my op- personal opinion, but you're using only LLM as judge, and then the way you account for the stochasticity of it is you're gonna sample multiple like N equals seven. You're gonna... [laughs] 
+
+00:43:02,138 --> 00:43:03,008 [Speaker 1]
+Oh. We do this as well. 
+
+00:43:03,008 --> 00:43:06,078 [Speaker 0]
+Yeah. [laughs] 
+
+00:43:06,078 --> 00:43:06,078 [Speaker 1]
+Yeah. [laughs] 
+
+00:43:06,078 --> 00:43:18,968 [Speaker 0]
+Uh, especially someone who's working in science, are you finding papers that use that methodology are having a hard time getting past peer review? Or, yeah, what, what do you think is the state of that kind of LLM as judge methodology? 
+
+00:43:18,968 --> 00:43:58,678 [Speaker 1]
+Mm, I, I think there's a lot of literature on it nowadays. Um, and I think it's... I'm, I'm actually not that deep into the field of LLM as a judge, so it's, it's not on top of it, but I do see a lot of production system adopt, uh, systems adopting it at least. Um, and I think this sort of sampling multiple LLMs is, is a pretty good way to, you know, get accurate labels but of- also overcome this whole determinism issue. You know, in, in scientific literature, we really have an issue with, uh, an LLM producing different results for the same inputs. Uh, we cannot... If, if you think about a really high impact use case like, uh, peer review or except for something, you, you really don't wanna- 
+
+00:43:58,678 --> 00:43:58,678 [Speaker 0]
+[laughs] 
+
+00:43:58,678 --> 00:44:07,208 [Speaker 1]
+... get different reviews, uh, with the, with the, with the same input. That's just gonna lead to, uh, a disaster basically. [laughs] 
+
+00:44:07,208 --> 00:44:19,278 [Speaker 0]
+Yeah, I can even imagine like if you have the agentic reviewer that has like tools and then it could... It's like not only is the LLM stochastic in each of its predictions, but now it's like taking these function calling trajectories 
+
+00:44:19,278 --> 00:44:19,288 [Speaker 6]
+[laughs] 
+
+00:44:19,288 --> 00:44:19,858 [Speaker 0]
+That [laughs] 
+
+00:44:19,858 --> 00:44:19,868 [Speaker 6]
+Yeah. 
+
+00:44:19,868 --> 00:44:31,468 [Speaker 0]
+How it's valued in the paper. And it could be taking all these different trajectories. So yeah, you could get the reviewer number two trajectory or the, you know, more... [laughs] I don't, I don't think there is like a non-reviewer number two that you'd call it- 
+
+00:44:31,468 --> 00:44:31,478 [Speaker 1]
+[laughs] 
+
+00:44:31,478 --> 00:44:53,668 [Speaker 0]
+... but like a more forgiving reviewer. Yeah, so this is super cool. And I guess like, um... So for me, I've, I've even put together like a retrieval system that I think of as pretty state-of-the-art that has information retrieval papers in it. And I'm curious if you've built the same kinda thing with maybe these diversity papers and just what you wanna ask it. [laughs] You know, like, I'm kinda like, "All right, what do I ask now?" 
+
+00:44:53,668 --> 00:44:57,268 [Speaker 1]
+Like, what questions you would ask a scientific retrieval system, you mean? Um... 
+
+00:44:57,268 --> 00:45:09,108 [Speaker 0]
+Yeah, yeah. Like, how's your experience? Have, have you built one of these systems for working on these, uh, for working on Pyversity? And then, and then I'm just curious like how much, how much is it helping your work? Like, how do you find yourself using it in your work? 
+
+00:45:09,108 --> 00:45:19,908 [Speaker 1]
+Oh, yeah. So, so, um, it's still very early. You know, I released, uh, Pyversity like one or two months ago. Um, I'm actually working on, on benchmarks at the moment. I really wanna create some sort of- 
+
+00:45:19,908 --> 00:45:19,968 [Speaker 0]
+Okay 
+
+00:45:19,968 --> 00:45:44,108 [Speaker 1]
+... um, unified benchmark suites for diversification algorithms because it's something that's not out there. At least I couldn't find it. So, I'm working on that in the background. Um, but then in my day-to-day job, um, you know, it's, it's... We haven't A-B tested it, and I think really the best, the only really good way to test something like diversification is you need to A-B test, um, some retrieval model where you can measure user satisfaction or click-through rates- 
+
+00:45:44,108 --> 00:45:44,117 [Speaker 0]
+Mm 
+
+00:45:44,117 --> 00:46:16,408 [Speaker 1]
+... or whatever your measure of success is. And you need to measure that with and without diversification. You know, you can come up with all of these fancy metrics. You can do your recall and your nDCG, and you can do the, the ilats and all the other [laughs] metrics for diversity. You can make beautiful plots, and they're all really great proxies. But at the end of the day, you need to measure in an A-B test setting. You just need to know if your users are actually responding positively to this diversification set that you're adding. And that's something we haven't done yet in production, but I, uh, do plan on doing, and I'm really curious about the results there. 
+
+00:46:16,408 --> 00:46:54,828 [Speaker 0]
+Yeah, I, I have an A-B test question that also kind of in- involves vector spaces for that sort of like, um, uh... I think it's called satisfiability is, is in this causal inference world. But I just wanna ask one more question about like... So maybe as you're building these benchmarks and you run tests, but you save the result of the test back into this sort of database system that's also looking at the literature, as well as maybe your lab notes and then like your code for implementing and then like the results of the experimental results. And may- That's kind of like where my intuition is taking me on like what's the next step for these like, uh, scientific, like assistance systems. Uh, does that sound interesting to you? Like you're s- 
+
+00:46:54,828 --> 00:47:22,118 [Speaker 1]
+Yeah. Yeah. I think pulling in... I, I actually see this as an issue, you know. Um, I think Google Scholar released something like two weeks ago or last week. So Google Scholar ... and I tested a little bit, of course, because it's... Yeah, we're working on similar things. And, um, I really think it's... it misses information. I think a lot of these systems, they only use scientific literature and usually, it's then even only, uh, journal papers or only conference papers or only open access literature. You know, you have different- 
+
+00:47:22,118 --> 00:47:22,128 [Speaker 0]
+Mm-hmm. 
+
+00:47:22,128 --> 00:47:49,188 [Speaker 1]
+These different subspaces. And you just don't know all the context, especially in a field like machine learning. There's a lot of state-of-the-art stuff out there that ha- that doesn't have a paper, or it's only a conference paper, or it's just benchmarks in a repository, or it's on AMPTP. You know, there's... it's, it's all over the place and I really think you need this, did this additional context in there to, to answer some of these questions in an emerging field like AI and machine learning. 
+
+00:47:49,188 --> 00:47:59,388 [Speaker 0]
+Yeah, I guess I have two perspectives on that. On one, I'm very interested in like our in- like we... 'cause we build this vector database and we, you know, are very... You know, curate your private information sources [laughs] using 
+
+00:47:59,388 --> 00:48:00,388 [Speaker 1]
+Yes. 
+
+00:48:00,388 --> 00:48:31,092 [Speaker 0]
+And then there's also all these really awesome like web search tools. Like, I really like Parallel as an example. And so it's like, I'm really curious in these systems that combine data on the web with private sources. And so on one end, I think there's the obvious like if I'm curating information about-... machine learning. I, I know the particular sources to look at and I could curate better than the web. But then I think a second interesting angle is maybe, um, fine-tuning models for search, like I have custom embedding models, custom re-rankers for like this particularly private- privately curated domain. So, I think that's maybe the other side of that story. 
+
+00:48:31,092 --> 00:49:02,040 [Speaker 1]
+Hmm. Yeah. That- that's really interesting as well. Yeah. I think if, if you have the data to, to post-train something or even pre-train something, then you should do it. I think it's- it's always gonna improve your results, especially... Now, the nice thing about scientific, uh, literature in particular is that it's actually so- such a large field that it's now part of benchmark, so there is this- there is an incentive for these large, uh, embedding model providers to be good at embedding scientific documents, um, making them good for classification and retrieval. Just because there is... 
+
+00:49:02,040 --> 00:49:02,040 [Speaker 0]
+Yeah. 
+
+00:49:02,040 --> 00:49:29,892 [Speaker 1]
+Cydocs is part of MDEP, for example. So, y- y- you wanna be good at scientific document tasks because you're gonna be better at these benchmarks that then show that your model is the best model in the world. Um, but so I think- but there are obviously like niche domains where that's not the case, where your domain is not part of some largely adopted benchmark and then, then you really wanna fine-tune on your data because you're probably- this models are probably not gonna work that well for your use case. 
+
+00:49:29,892 --> 00:49:38,241 [Speaker 0]
+Yeah, super cool. I remember like the Allen Institute had the Spectre embedding model as they were like, um... And I think I had Kyle Low on the- on like the seventh WeVA podcast I mentioned. 
+
+00:49:38,241 --> 00:49:38,282 [Speaker 1]
+Oh, cool. 
+
+00:49:38,282 --> 00:49:55,991 [Speaker 0]
+This is the 132nd [laughs], so I've- [laughs] ... I sort of had an eye on this. [laughs] I, I just love the scientific literature mining. It's such a cool... Yeah, like you mentioned, 'cause I think that is an aspect of it I hadn't appreciated enough, is that each of the data points is so curated. Like each paper, people put a lot of work into their papers and, yeah. 
+
+00:49:55,991 --> 00:49:56,072 [Speaker 1]
+Yeah. 
+
+00:49:56,072 --> 00:50:14,392 [Speaker 0]
+That's Cool. So, I mentioned I wanted to ask about causal inference, but I think maybe we'll save that topic and I- I wanna just kinda ask about, like a question I love to anchor these podcasts is just, as someone who's working in the space, uh, what, what directions for the future of AI, maybe like broadly outside of the- your particular expertise, but what, what directions for AI excite you the most? 
+
+00:50:14,392 --> 00:51:43,011 [Speaker 1]
+Hmm, good question. I think that, um, you know, um, agentic technology and LLMs is, is the obvious thing that's, that's, uh, is, is happening at the moment. There's a lot of research into this. And I am, uh... I used to be a skeptic, but nowadays having used a bunch of LLMs for, for coding and for doing research, I'm starting to really believe that, um, that the field is- that it's gonna be very good at doing research. Um, and that's something that I didn't believe two years ago, that's you would be able to come up with novel research using LLMs. But now, with this whole complex engineering piece happening, you know, being able to pool rich information and inference time, and then you also have test time inference with- with reasoning models, I think this whole combination is going to lead to us being able to, um, actually do novel research with LLMs, or at least set up the- the initial for it, you know? Help us as humans come up with new ideas using LLMs' assistance for that as a first step. And that's a direction I'm super excited for. You know, when we, as a scientific publisher, obviously we wanna enable this. We wanna make sure that people can use these- these large language models and agentic technologies in a way that allows them to do their research more efficiently and actually come up with new ideas, things they- that they wouldn't have been able to come up with two or three years ago and now can come up with and act- and- and make it, yeah, feasible to do that research as well with LLMs. 
+
+00:51:43,011 --> 00:52:15,152 [Speaker 0]
+Yeah. I think that's also kinda like one of Sam Altman's big talking points lately has been, uh, you know, get ready for the pace of scientific progress to explode. And, um, I guess just like to be completely honest with where I'm at with using these systems in my research is, I don't think I- I haven't quite... Like I'm at that point I mentioned earlier of like I'm saving the results of my experiments back into my system, and then my system has like papers, my code base, and then my notes and then my experimental results. But I- I haven't quite gotten it to where it's autonomously running experiments, and maybe I'm like, you know- 
+
+00:52:15,152 --> 00:52:15,221 [Speaker 1]
+Yeah 
+
+00:52:15,221 --> 00:52:40,551 [Speaker 0]
+... exposing myself as not being as advanced as everyone else, but are- do you think that's really common that we're seeing? And I d- I- it, you know, it makes a lot of sense to me. You just compute it, you know, connect it to like a sandbox to run the experiments and it's not like a conceptual blocker. Um, and, and just- and maybe I am just behind, but are you- do you think that's like- that's already here? Is that like the next three to six months, like where the LMs are really like running their experiments as well? 
+
+00:52:40,551 --> 00:53:09,741 [Speaker 1]
+Yeah. I think that's happening now or in- in- in- next year, at least for me. When- when I'm- I- I love using the CLI tools like Cloud Code and GitHub Copilot CLI and stuff like that, and that's- that- that's kind of like magic. Now, I do think that the quality is not there yet in a lot of cases, especially if you're doing something truly novel. I do see a lot of mistakes there and I need to intervene at several stages. But I am able to give the single command and it just, uh- and delegate tasks to- to an agent and it will come up with a solution, at least in Yeah. 
+
+00:53:09,741 --> 00:54:04,392 [Speaker 0]
+... program. And that's, um, that's a big difference between now and a year ago. I get a working solution. I'm not happy with that solution in most cases, but it's at least a solution that works. I can, you know, if I have a web app or whatever, I can run it and- and it just- and it does at least work, and then I need to fix it, if that makes sense. And I think in the next year, we're gonna probably get to a point where I am happy with the outcome of that. And at that point, um, yeah, who knows? It's, uh... I have to say, though, uh, for me, it's- it's mostly coding that I'm evaluating on, right? Um, that this- that this whole idea around doing novel research with it is kind of guesswork for me because I'm not doing that myself. I'm not a researcher. I'm an engineer at a scientific literature company. Uh, so for me, it's- it's actually more the coding side that I'm interested in and that I'm actually doing in my day-to-day job. But there, I do see it getting to a point where it can be autonomous and just run experiments overnight, and then I wake up-
+
+00:54:04,687 --> 00:54:08,268 [Speaker 1]
+... and I just have something ready to go. [laughs] 
+
+00:54:08,268 --> 00:54:10,258 [Speaker 0]
+[laughs] Yeah. You- [laughs] 
+
+00:54:10,258 --> 00:54:10,288 [Speaker 1]
+Yeah. [laughs] 
+
+00:54:10,288 --> 00:54:14,868 [Speaker 0]
+Totally new, [laughs] written on paper and everything, and it's sent it for you. [laughs] 
+
+00:54:14,868 --> 00:54:15,948 [Speaker 1]
+Exactly, yeah. 
+
+00:54:15,948 --> 00:54:25,747 [Speaker 0]
+Yeah, yeah. [laughs] Uh, are you using... With the coding work, are you using a lot of, like, "I have five tasks and they all run in parallel?" Are you finding a lot of adoption from that? 
+
+00:54:25,747 --> 00:55:09,778 [Speaker 1]
+Yeah, I think it's pretty useful, but it also, for me, leads to a lot of mental overhead because, again, the quality is usually not there, right? Um, so what I tend to do nowadays is, um, I sort of classify upfront, is this task... Is it gonna do this task well? Um, so if I, for example, need to make a small change in my CICD, I will just delegate it to an agent, and I'll have a VR up in five minutes, and I can instant approve it. If I am, you know, adding a- a different modality to my vector database or something like that, something complicated, then, um, I'm gonna do it myself. I might ask for, like, an initial setup or ideation or brainstorm a little bit, but I just know that the mental overhead for me of delegating that and then getting this huge, massive PR up that I- 
+
+00:55:09,778 --> 00:55:09,778 [Speaker 0]
+[laughs] 
+
+00:55:09,778 --> 00:55:30,008 [Speaker 1]
+... am pretty unhappy with, I- I much prefer just- just writing something myself and then having it reviewed by the LLM. So- so it's kind of the... There's- there's two sides. You d- you let the LLM do it, and then you review it, or you let... Or you do it and you let the LLM review it. And I sort of switch back and forth between those two based on the complexity of the task. 
+
+00:55:30,008 --> 00:55:37,348 [Speaker 0]
+Y- yeah, I- I see that a lot, especially, like, with open source. GitHub repositories is now super common to have your PR be met with a [laughs] like a- 
+
+00:55:37,348 --> 00:55:37,798 [Speaker 1]
+Oh, yeah 
+
+00:55:37,798 --> 00:55:40,118 [Speaker 0]
+... LLM review. [laughs] 
+
+00:55:40,118 --> 00:55:40,127 [Speaker 1]
+[laughs] 
+
+00:55:40,127 --> 00:55:49,848 [Speaker 0]
+But it's like, that's kinda what the linters and the tests are for. I- so I'm like, w- what's it really doing novelly than that, with the reviewer application? Um... 
+
+00:55:49,848 --> 00:56:53,448 [Speaker 1]
+Yeah, yeah. I think it- it's- it's... again, depends a bit on the complexity of the BR- PR, because indeed, um, in... [laughs] i- if, l- let's say, in a company that's decently adopted, like, recent tech and has, like pre-commit and CSED and everything set up properly, you expect pretty good code to roll out automatically, right? You- you won't even be able to push code that isn't tested and typed and, you know, linted and what have you. Um, so assuming that's all there, then all that should be left is- is checking for architectural design. That's something it doesn't do well, in my opinion. Like, I've never really gotten a good comment like, "Hey, your overall architecture of your code base, it could be done better." I've never gotten a good comment about that. And then the other one is- is bugs or complexity issues, and that it does pretty well, I think. Like, that's the case where I usually let it review me and I specifically ask, "Hey, just focus on bugs and, uh, you know, complexity stuff. Make it optimized, make it fast," and then it can usually find some, like, little lines in my code base which- which I'm pretty happy with. 
+
+00:56:53,448 --> 00:57:48,488 [Speaker 0]
+Yeah. Well, I'll give the AI credit there. I think I'm... I've been a professional software engineer. I mean, I- I don't, I wouldn't say I do it all the time with my work, but like, um, I- I've been doing it for maybe like four years now, and I'm just now, like, really appreciating, like, hexagonal architecture [laughs], like regis- like these design patterns. I'm- I'm honestly just now really appreciating it, so I'll give the LMs a pass. But, uh, yeah, I- I mean, it's pretty interesting. Software architecture is quite interesting. It's like, um... Yeah, just like the way you organize code is... Yeah, really cool. Uh, yeah, and so- so I- I kind of- I'm gonna have to give you this question kind of twice. I- I'm also really curious about Springer Nature. I- I had a really great time. I published my papers when I was doing my PhD in Springer Nature and had a really great experience with the, uh, Journal of Big Data and [laughs] it was awesome. And so I'm kind of curious, just like, um, maybe like what are some of the future directions for the Springer Nature platform with AI and... 
+
+00:57:48,488 --> 00:59:17,908 [Speaker 1]
+Hmm. Yeah, good question. So one of the major products we're working on now is called Nature Research Assistant. Uh, and this is this sort of, uh, all in one, uh, generative AI powered research assistant which can help you discover new literature, you know, understand, uh, research fields really quickly, or write your own literature. And this is something we're investing a lot in at the moment. Uh, it's, um... You can- you can also sign up for the open beta right now, uh, for this product and explore it a bit yourself. But what I think offsets this from, you know, your... Let's take this Google Scholar search case as an example, where you just type in a question and you get back some papers. Here, you get like this curated list back with, uh, "Hey, these are the classics from this field. These were the papers that grounded. And here's some research that follows up from your research based on... It- it cited what you just read and this is what was cited." And, you know, you get this whole... We- we as a scientific publisher obviously have a lot more than just, um, the text of the paper or the title and abstract. Like, a lot of these models, they just use the title and the abstract and they try to do a bunch of stuff with that, but research is a lot richer than that. You have your citations, you have your references, you have your metadata there, the authors. There's this graph relationship between all the authors in the world. Um, there's so much beautiful data that we can use to make these systems, like, re- really work well. Um, so that's something we're working on a lot. And then, obviously, we're also just still trying to improve the process for our authors using AI because, um, yeah, you've published scientific literature, you know that it can be a- a pain sometimes, you know, waiting for reviews to come in- 
+
+00:59:17,908 --> 00:59:18,048 [Speaker 0]
+Yeah 
+
+00:59:18,048 --> 00:59:46,428 [Speaker 1]
+... waiting for an editor to be found. It can be a very lengthy process, especially for these sort of top-tier journals. And we really wanna make this process a- as fast and as smooth as possible, while also ensuring the- the integrity of the process, because I think that's what really sets us apart from, um, someone like Archive, for example. We- we really try to make sure that what we publish is, um... Is- is valid research and sounds and has been reviewed by actual experts in the fields. 
+
+00:59:46,428 --> 01:00:09,627 [Speaker 0]
+Yeah, that's amazing. Well, Thomas, thanks so much for joining the We Game Podcast. This has been such a cool episode. I kind of... Uh, maybe come back. I really hope people check out Piversity. It's... All- all the Piversity algorithms, it's such an interesting thing that's emerging, as well as, I think, in this latter end of discussing scientific literature mining, just such an exciting application domain. So cool about hearing the evolution of Springer Nature with all these new AI technologies. Uh, Thomas, thanks so much for joining. 
+
+01:00:09,627 --> 01:00:15,587 [Speaker 1]
+Yeah. Thanks for having me, Connor. It was a pleasure to be here. 
+
+01:00:15,587 --> 01:00:31,028 [Speaker 1]
+[typewriter sounds] [outro rock music]
