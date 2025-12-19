@@ -12,3 +12,6 @@ An MCP server for the Weaviate Podcast!
 - [YouTube](https://www.youtube.com/watch?v=koPBr9W4qU0)
 - [Spotify](https://spotifycreators-web.app.link/e/WlPOhLtSUYb)
 
+[130] REFRAG with Xiaoqiang Lin
+- [YouTube](https://www.youtube.com/watch?v=yi7v-UXMg0U)
+- [Spotify](https://spotifycreators-web.app.link/e/TMG3ILtSUYb)
