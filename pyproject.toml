@@ -1,0 +1,10 @@
+[project]
+name = "weaviate-podcast-search"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "weaviate-agents>=1.1.0",
+    "weaviate-client>=4.19.0",
+]
