@@ -35,3 +35,7 @@ An MCP server for the Weaviate Podcast!
 [125] Sufficient Context with Hailey Joren
 - [YouTube](https://www.youtube.com/watch?v=EU8BUMJLd54)
 - [Spotify](https://spotifycreators-web.app.link/e/FA7aAOtSUYb)
+
+[124] RAG Benchmarks with Nandan Thakur
+- [YouTube](https://www.youtube.com/watch?v=x9zZ03XtAuY)
+- [Spotify](https://spotifycreators-web.app.link/e/uEuSjPtSUYb)
