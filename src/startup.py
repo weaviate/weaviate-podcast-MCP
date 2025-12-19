@@ -18,8 +18,8 @@ def _create_pod_collections(weaviate_client: weaviate.Client):
 
 def _upload_pods(collection: weaviate.Collection):
     pods = []
-    for pod_filename in os.listdir("podcast-summaries"):
-        with open(f"podcast-summaries/{pod_filename}", "r") as f:
+    for pod_filename in os.listdir("data/podcast-summaries"):
+        with open(f"data/podcast-summaries/{pod_filename}", "r") as f:
             pod_summary = f.read()
         pods.append({
             "pod_number": pod_filename.split(".")[0],
