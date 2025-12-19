@@ -27,3 +27,7 @@ An MCP server for the Weaviate Podcast!
 [127] GEPA with Lakshya A. Agrawal
 - [YouTube](https://www.youtube.com/watch?v=fREQrxhBSk0)
 - [Spotify](https://spotifycreators-web.app.link/e/xBLNlNtSUYb)
+
+[126] Agentic Topic Modeling with Maarten Grootendorst
+- [YouTube](https://www.youtube.com/watch?v=Lt6CRZ7ypPA)
+- [Spotify](https://spotifycreators-web.app.link/e/G9vd7NtSUYb)
