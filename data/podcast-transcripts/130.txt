@@ -1,0 +1,338 @@
+00:00:00,140 --> 00:00:20,440 [Speaker 0]
+Hey, everyone. Thank you so much for watching another episode of the Weaviate podcast. I'm super excited to welcome Xiaogang Lin, a PhD student at the National University of Singapore. During his time at Meta, Xiaogang led the research behind Refrag, Rethinking Rag-based Decoding. We're super, super excited about this work at Weaviate, and I can't wait to dive into this further. Xiaogang, thank you so much for joining the Weaviate podcast. 
+
+00:00:20,440 --> 00:00:23,280 [Speaker 1]
+Yeah, great to be here. 
+
+00:00:23,280 --> 00:00:35,600 [Speaker 0]
+Awesome. So, uh, could we maybe kick it off, uh, for people who aren't already familiar with Refrag and m- what it is, the key innovations?Do you mind s- maybe sort of giving the, uh, the helicot- helicopter elevator pitch of what it is? 
+
+00:00:35,600 --> 00:01:38,860 [Speaker 1]
+Yeah, sure. So, um, basically, Refrag is a early attempt, um, um, that I did, um, to, um, accelerate the latency in, um, [smacks lips] our retrieval augmented generation. So, specifically if you think about, um, the current re- um, RAG systems, right, the latency is pretty high, um, especially when, when you talk about, um, um, doing this search agent, right? You, you have, uh, so many search result from the, uh, Google Search engine or, um, Bing Search. You have so many search result and you, you put those search result in a prompt, and that makes the, the LM inference really slow. And, um, the result of that is that user will be, um, having, um, very bad experience because they have to wait very long before you get the answer. So, um, Refrag is really a attempt, early attempt to, um, address this issue and, um, try to accelerate the late... uh, accelerate the LM inference, um- 
+
+00:01:38,920 --> 00:01:38,930 [Speaker 0]
+[clears throat] 
+
+00:01:38,930 --> 00:01:45,920 [Speaker 1]
+... specifically designed for RAG system, um, so that user can have better experience. 
+
+00:01:45,920 --> 00:02:16,160 [Speaker 0]
+Yeah, amazing. I think there's so many cool details to it, like the, uh... You kinda mentioned the sort of time to first token improvement and, yeah, overall, I think there's a really interesting topic to go down about time to first token versus throughput. Hey, do you mind maybe just sort of explaining this concept of say, you have the 256-token chunk in the vector database, and then within it you have, say, 16, 16-token chunk vectors, and then you also have the token vectors. Maybe just explain the sort of like multi-granular representation. 
+
+00:02:16,160 --> 00:04:45,400 [Speaker 1]
+Yeah, sure. So, um, basically, um, in Refrag, right, the way that we design the system is, is that we, we kind of modeled the idea from the vision language model where people treat, um, um, vision, uh, like images, right, as a modality, and they kind of, um, use an embedding or a single embedding or several embeddings to represent certain images. Um, and, um, it's, it's kind of similar idea in our case, 'cause we treat, um, chunk as, um, a new modality, right? And, um, the way that we put chunk in a system is not by putting the, the raw tokens, um, like what we did for normal RAG system, right? We just, um, keep all the tokens from the chunk, um, uh, in, in the decoder input. Um, and then we just ge- uh, generate the answer. The way we do it is that we transform those chunk into one single embedding or several embeddings so that, um, we, we... Instead of using the raw token, we use those embeddings to generate the answer directly. And, um, the benefit of doing that is, um, is quite intuitive, because if you think about raw tokens, right? Let's say you have a chunk with 16 tokens. Um, it will take 16 tokens... Um, it, it will take 16, um, embedding, uh, token, uh, in the context, right? And that's really undesirable because, um, you can... you could have so many chunks, and, um, that would, uh, uh, make the context, um, super long. But, um, the way that... Uh, if you do... Uh, if you do it, uh, in our way, um, instead of putting 16 chunks directly in a decoder, now you can use one single chunk embedding to represent the whole chunk, and that would only take one single, uh, position in a chunk embedding, uh, in a, in the context window, right? And, um, so this is a reduction by 16 times if you think about it, right? Let's say you have, um, 16K, uh, context. Um, after using, uh, our Refrag, you only need to put 1,000 tokens in a context, and that's really a significant reduction in terms of the prompt, uh, the length of the prompt. And, um, yeah, that's really why w- we could have, um, those significant performance, um, boost, um, from our evaluations. 
+
+00:04:45,400 --> 00:05:06,830 [Speaker 0]
+Yeah, it's super interesting, and I, I had a lot of fun playing with these numbers too, mentioning going from 16,000 token vectors down to 1,024 chunk vectors when using, you know, K equals 16. But, say you use K equal 32, and now you have 512 vectors. If you just think about the reduction in the input length from 16,000 to 512, and, yeah, it's really amazing. 
+
+00:05:06,830 --> 00:05:06,840 [Speaker 1]
+Yeah. Exactly. 
+
+00:05:06,840 --> 00:05:27,180 [Speaker 0]
+And I guess, um, it just really inspires your imagination. I was... As I mentioned, I was playing with these numbers a little bit, and I went up to thinking about, like, 65,000 down to 2048 or 262,000 [laughs] down to 8192 as I'm just, you know, multiplying numbers by two and then dividing by 32, but, uh, I, I... 
+
+00:05:27,180 --> 00:05:27,240 [Speaker 1]
+Yeah. 
+
+00:05:27,240 --> 00:05:42,920 [Speaker 0]
+So, maybe my first question is, uh, uh... Or not my first question, but, like, just continuing on this, um, w- maybe even jumping ahead a bit, but what do you think about sort of the limits of this compression? What, what kind of things are you seeing as you really push long-context scaling with Refrag? 
+
+00:05:42,920 --> 00:06:22,910 [Speaker 1]
+Yeah. So, um, actually, we, we did a lot of experiment, um, in early exploration stage. Um, espcia- especially, um, in the beginning, you know? The, the, the initial idea is to use one single embedding for the whole chunk. And, um, let's say, like, in normal RAG system, right, usually one chunk could contain, you know, several hundred to one, 1K or, or several K tokens, right? One single chunk.... could contain that much, uh, that many, um, tokens, right? And initially, we want to use one single embedding for the whole chunk. And it turns out that the model, um, doesn't work. 
+
+00:06:22,910 --> 00:07:54,570 [Speaker 1]
+It doesn't work at all because you are- you are looking at a few hundred to 1,000 compression rate and, um, that's really the limit of, um, o- of, um, this kind of system 'cause we- we- we want to have a big compression rate, but, uh, we- we- we would also want to have good quality, right? We want to have a model that, um, has the performance that almost match the original model before the compression, right? So, um, initially, what we- we were thinking, oh, maybe this is because the compression rate is too high that the model, um, is not able to reconstruct the information from the chunky value. So what we did is that we kind of stringed, uh, you know, reduced the, uh, compression rate from a few hundred to, uh, 100 and we further reduced, um, the- the compression rate down to 16 and 32. And, um, so what we found is that if you use the compression rate of 32, your performance would be comparable to the performance of the language model that doesn't use any compression. But if you exceed that 32 compression rate, you would have a major performance degradation and that's really why we- we use this, um, 16 and 32 compression rate, y- because we- we are looking at this, um, you know, p- performance, uh, frontier, right? We- we- we want to have a low latency, but at the same time good performance. 
+
+00:07:54,570 --> 00:08:25,870 [Speaker 0]
+Yeah, amazing. I think just kind of one question I have that transitions right from this is, um, the idea of quantizing the chunk vectors, and so maybe I- you- I don't know how- what- I- I- sorry, I missed this detail when I- I did read the paper thoroughly, but I- I missed this detail about what kind of quantization is used in the chunk vectors. You think you could say, use, you know, binary quantization and things like this to further take down, say, the storage overhead as well as what might be the, yeah, losses as it goes through the decoder? 
+
+00:08:25,870 --> 00:10:17,510 [Speaker 1]
+Yeah. So, um, you- you know, in our Refract, we- we actually do not, um, do, uh, quantization for the, uh, the chunk embeddings. And, um, you know, the- the main focus is on, you know, the, uh, compression of the prompt, the- the length of the input. And, um, the quantization, um, like, w- we should kind of, uh... The quantization, uh, is considered when we try to do the pre-computation, right? Um, think about, um, the, um, vectors, right? If you want to pre-compute the vector for post chunks, we would have to think about, um, how to quantize these, um, chunk embeddings so that we use very few memories, um, in- in the disc to, um, store all these, um, pre-computation result. And in inference time, we could use those pre-computed vectors to do the inference directly and, um, but w- we didn't focus on that because, you know, our work is mainly focusing on- on the, um, the length of the input and, uh, all those quantization method that you- you see in, um, out there can be used to, uh, further, um, reduce the memory requirement for our system. But, you know, o- one thing that I- I- I wish to mention is, uh, for- for Refract, right, we actually provide two kind of result. The first kind of result is that if you do pre-computation for all the chunk embedding, right? Um, meaning that for all the chunks, you pre-compute all the embeddings. And then, um, at the inference time, you just retrieve these embeddings and then generate the result. The other way, um, to- to- to use our Refract is that you don't do pre-computation at all. Um, you compute all these chunk embedding on the fly, but in parallel. So, um, 
+
+00:10:17,510 --> 00:10:22,869 [Speaker 1]
+for that scenario, we- we also observe significant, uh, 
+
+00:10:22,870 --> 00:10:48,390 [Speaker 1]
+latency, uh, improvement compared to the uncompressed version. And, um, the- the main reason for that is because, you know, for our- our, um, Refract, right, we- we don't do a lot of, um, self-attention in- in the, um, previous stage. Um, think about, uh, our architecture. For tokens that is, um, not in the same chunk, right, they will never attend to each other 
+
+00:10:48,390 --> 00:11:48,190 [Speaker 1]
+and this is a reduction, um, um, in the- in the number of calculation for the previous stage, right? So, um, even if you don't, um, pre-compute all the embeddings and you do the computation on the fly, you still get a very significant performance boost. So that- that's, um, that's, uh, something that we found, uh, is pretty amazing because think about the production system, right? A lot of time, if you- if you store all these chunk embedding, it will be a huge cost for the, um, you know, for the memory, right? 'Cause you have so many chunks in the internet. And, um, if you- if you have to pre-compute everything, that would be a very significant cost. So a lot of time what, um, people do is that they pre-compute the chunks that was- that were most, um, frequently, uh, accessed, right? Like, maybe, um, top 10%, top 5%. And then 
+
+00:11:48,190 --> 00:12:22,558 [Speaker 1]
+at the inference time, if, um, the query, um, accidentally hit all the cache in the memory, then you could just use those chu- vectors from the, uh, memory to, um, to do the inference. But if- if it doesn't, because they are 95% to 90% of chunks that were not pre-computed, right, you have to compute the, uh, chunk embedding on the fly.... and, um, and our method could also accelerate in that use case, which, um, means a lot for the production system. 
+
+00:12:22,558 --> 00:13:01,078 [Speaker 0]
+That's really cool. I'm already loving this podcast, and I've already learned quite a few things. And, um, yes, I- I love that idea of, um, only pre-computing the top 10%, top 5%. We have ideas like a vector cache in Weaviate and things like this of keeping in memory, um, certain nodes that are often expanded. Um, uh, so there's one detail you just mentioned that I didn't understand that well when I read the paper, which is, uh, you're mentioning that... I think it's the block diagonal attention and you mentioned in pre-fill, uh, y- y- chunks don't attend to each other, so, so that means you have a custom kind of transformer for this part? Do you mind maybe just explaining that further for people who don't understand these transformer architectures as well? 
+
+00:13:01,078 --> 00:14:45,758 [Speaker 1]
+Yeah, sure. Um, so think about, um, a specific use case that, um, let's say we, we ask the question on, on who's the president of the US and, um, you could get five search results from the search engine, right? And, um, the way that people usually do rack is that they just concatenate those five chunks, um, into one single prompt. And then, uh, the whole prompt is, um, given to the transformer. And when you do the pre-fill, right? Um, what the transformer will do is that when, when you calculate the KV-cache, it will, uh, calculate the attention value between all the tokens in the prompt. So basically self-attention, right? Multi-head, um, uh, attention. And when you do that, you will calculate all the, um, pairwise, uh, you know, uh, attention value, um, in, in the whole, um, prompt, right? So that means any tokens in the prompt, like let's say any two token in the prompt, they will be attend to each other when, when computing the KV-cache for the pre-fill stage. But in our case, think about the chunk compression, right? The whole chunk is compressed into one single token embedding before we feed it to the decoder, which, which is like LLaMA and, and those models, right? So when you do this compression, um, the tokens within each chunk, they will attend to each other in the enc- in the encoder, right? In the encoder, they will attend to each other and arrive to a final chunk embedding. But what... In the decoder, only chunk embedding will attend to each other, not the token within the chunk, uh, within the chunk, right? Because those token, they are compressed into one single token. 
+
+00:14:45,758 --> 00:15:30,958 [Speaker 1]
+And that means on a chunk level, like, they only attend to each other in a chunk level. And this will reduce the attention calculation by a lot. And we argue that this, um, reduction in a- attention calculation is actually, um... is good because, um, the- the attention calculation, um, itself, um, for the tokens from different chunks, they are redundant. They are not necessary because we have revisualized, um, the, uh... these attention values and, and we- we- you eventually find that, oh, this attention value, they are very small and they shouldn't be calculated, um, in the first place. 
+
+00:15:30,958 --> 00:15:37,638 [Speaker 1]
+So th- that's why, um, we have this, um, argument here. 
+
+00:15:37,638 --> 00:16:01,898 [Speaker 0]
+And so I think, um, w- with that argument, it- it's kind of interesting. I... Like when I first started reading Refrag, I... So I always do, I'm sure everyone does this now, is you give the paper to Cloud or ChatGPT and Gemini, whichever language model, and you say, "Hey, could you summarize this?" And this was all the language models, this was their favorite takeaway, is this kind of, um, motivation of there's redundant information in the retrieved context. And therefore- 
+
+00:16:01,898 --> 00:16:01,948 [Speaker 1]
+Yeah 
+
+00:16:01,948 --> 00:16:39,998 [Speaker 0]
+... that's why you have this shortcut around attending over the context. Um, so, so because... A- and then kinda... From our experience at Weaviate, I- I definitely think there's a lot of, like, you're ranking the candidate documents by their relevance to the query. There's oftentimes isn't... There's isn't really some sort of, like, diversity mechanism in there. But, um... And I don't mean to stay on this topic too long, but, uh, but just do you think this is because retrieval doesn't have too much sort of like, uh, relevance to de- de-duplication sort of, and ma- maybe if you had like a diversity, like a maximal marginal relevance or something that's trying to promote diversity in search results, maybe this would 
+
+00:16:39,998 --> 00:17:04,318 [Speaker 0]
+change it a little bit. And I think, I think it'll... Sorry, this is a long-winded que- long-winded question, but I think as we talk about this RL for selective expansion, and this is such a, a big part of this, but yeah. So, sorry, I don't know what the question i- is in that. Maybe just, like, sort of, do you think if there's diversity mechanisms in the search results that that might change it a little bit? Uh, yeah. 
+
+00:17:04,318 --> 00:20:00,088 [Speaker 1]
+Yeah. Um, so a- actually, for the RL policy, it's not, uh, really relevant to the, uh, divers- diversity consideration. Um, I would say, like, the diversity consideration you mentioned, it- it's really practical. You, you are right. A lot of, um, uh, system, these RAG systems, right, in the final layer, they will do de-dupe. Basically, um, if two chunks they are too similar, they will, um, they'll kind of cut one off, one, um, away from the, uh, final result, right? And, um, that would affect, uh, that would actually affect, um, the, um, attention values between dif- different chunks, right? Uh, this is really, uh, why we were saying that for tokens for dif- from different chunks, right, they have smaller attention value because those tokens, they're actually from very different sentences, right? And, um, and if... They are not, they are not coming from the same natural language sentence, right? They are from different, uh, snips, from different ar- articles, right? So that's really the fundamental reason why these tokens, when they attend to each other, they have very low, uh, attention value because they are not from the same, uh, sentence or the same article.So, um, that really affect, um, um, the, the, the attention value in, in a pre-fill. And, uh, and also why we, we would, uh, we would want to do the, um, compression, right? 'Cause, um, this attention value, they, they are not... They are redundant. And o- on the other policy, I, I, um, it's really a different com- consideration. Um, so the, the reason why we were thinking about this, our policy, is because when, when we, um, when we train our model, right, um, we, we figure out that for the chunks with very complex information, the decoder wouldn't be able to understand it, um, very well. So, let's say for one chunk, if it contains numbers and we ask the decoder to repeat the number, um, in, in the, using that chunk embedding, right? We... What do we observe is that, um, the numbers, they will be, um... They, the decoder wouldn't be able to reconstruct the number exactly, especially if the number is super complex and very long. So, um, that's really, um, make us, you know, uh, thinking, uh, that, uh, maybe this compression is not perfect, right? 'Cause, um, even though we, we, uh, match the performance or, like, have a small, very small, uh, uh, uh, degradating perplexity, but, um, when we actually use the model, um, the decoder cannot, uh, understand complex chunk information, especially when the chunk, uh, contain very complex information. So, um, we have the idea that not all chunk they're created equal. 
+
+00:20:00,088 --> 00:21:02,528 [Speaker 1]
+'Cause, um, some chunk, they have more complex information than others, like numbers. Uh, but some chunk, they only contain semantic, high-level semantic. Right? And, um, in that case, we believe that for those chunk, uh, chunk embedding should be sufficient to express the high-level stuff. But when, when it comes, comes to those very detailed numbers and very detailed informations, we think there are more entropy in those, um, in those chunk, and we, we shouldn't compress it because doing compression really hurts those very detailed information, and the decoder wouldn't be able to repeat or, like, even reconstruct. So, um, the R selection policy, uh, uh, the R selective, uh, compression is really to address this problem of, um, different chunk having different amount of information. And we believe that, um, we can train a policy to automatically decide which chunk are more informative than other chunks. 
+
+00:21:02,528 --> 00:21:26,488 [Speaker 1]
+And for those, uh, more informative chunks, we put the raw token in the decoder. But for the less informative chunks, we put a single chunk embedding in the decoder to represent the whole chunk. So, this really, um, further boosts our, the performance of our model because now we, we, we n- we have a, a simple policy to decide, um, 
+
+00:21:26,488 --> 00:21:35,408 [Speaker 1]
+whether we should compress or not. And that would make the generation quality much better. 
+
+00:21:35,408 --> 00:22:55,948 [Speaker 0]
+Yeah, amazing. I, I wanna come back to talking about how you train the expansion policy, but just reflecting on that idea of kind of, uh, expanding out one chunk because it contains a number, this is maybe sort of the boldest idea I sort of had as I was reflecting on Reffrag, was sort of, are vector embeddings all you need? And the sort of... So, so kind of I was thinking about, um, there's a big argument around using LMs to extract structured data from unstructured data. Say I take the markdown of my blog and I extract date published or the authors. Compared to the sort of long context, uh, uh, it just, you just give all your data to the LLM. And now that it... Now that all your data has these vectors associated with it, they can expand the parts of the, uh, parts of the chunks that contain that date published information, especially as we talk about these huge compressions. Like, I could have... Yeah, I, I don't have that quick lookup, but say 262,000, I think, goes down to 8,000 tokens when you have K=32. But... And you can imagine all sorts of combinations like this, but that kind of ability to just expand out each of the chunks that would contain the date published, I think it's a, a really profound idea if we're thinking about the future of database systems with these kind of, uh, yeah, these kind of Reffrag long-context architectures. Yeah. 
+
+00:22:55,948 --> 00:22:58,508 [Speaker 1]
+Right. 
+
+00:22:58,508 --> 00:23:12,428 [Speaker 0]
+Yes, I guess, um, I, I guess, I'd love to just get your, your quick take on that, if you think that, like, this could be, like, sort of... I- if you c- if you could scale this really tremendously to maybe this is, like, a totally new kind of database system. 
+
+00:23:12,428 --> 00:24:51,168 [Speaker 1]
+Yeah. Um, I, I think, uh, the way that, uh, Reffrag designed the rack, right, um, could affect the, uh, the way that we, we design the, um, database system, um, nowadays, right? Uh, uh, so again, um, s- for... I, I would like to mention, I, I'm not an expert in database, and I, I know very few, uh, technical stuff in this field. But, uh, I do think that Reffrag will... would, um... If, if it's... If we could put, uh, Reffrag in a production, we could potentially change the way, um, how we serve the rack and, uh, the way we interact with the database. And, um, 'cause p- uh, think about the, the, um, database, uh, we use for, um, rack system right now, right? Um, in the final layer, we would do the, um, retrieval using the embedding, and we use the query embedding and then, uh, for the chunk embe- and, and we also, uh, compute those... uh, pre-compute all the chunk, the embedding for the chunks. And, uh, when we do the retrieval, we just, uh, do a K-NN search, right? And then, uh, to, to get the k most relevant, uh, chunk embedding. And... But, you know, for the current system, we, we, we just throw all this embedding away.... with... 'Cause, um, we only put the raw token in the decoder, right? So those embeddings, they will actually tr- uh, throw away. And a lot of time, you know, for those production, uh, system, they, they use, uh, heavy quantization on, on those, on embeddings because, uh, for the k-n, uh, result, right, they, they only need to get, uh, an, a approximately correct [children shouting] [clanging] uh, k, uh, 
+
+00:24:51,168 --> 00:24:51,178 [Speaker 2]
+[laughs] 
+
+00:24:51,178 --> 00:25:00,508 [Speaker 1]
+... top-k, uh, rather than, uh, uh, result, right? So I, I believe that, um, if we really want to use Refract, we have to reform this, um, 
+
+00:25:00,508 --> 00:25:31,628 [Speaker 1]
+or reconfigure the database, so that, um, instead of focusing the chunk, uh, the, the, the token in the chunk, we should focus on, um, the vectors in, in the database. And because in our Rec syst- in our Refract, we, we actually need, uh, the full position, uh, vectors, right? Um, but, but for the current system, those embeddings, they, they are... they don't really matter. They, they do heavy quantization, and, uh, they, they also do, uh, 
+
+00:25:31,628 --> 00:25:56,548 [Speaker 1]
+um... they, they throw it away when doing inference. So, um, w- w- if, uh, Refract really, um... is really used in production, m- maybe we, we need to, uh, think about how, how we should... how, how we should deal with, um, a database that focus more on the... on the vector itself instead of the raw tokens. 
+
+00:25:56,548 --> 00:26:34,858 [Speaker 0]
+Yeah, amazing. Yeah, I, I, I think obviously kind of like with Weaviate and our vector database, we're super excited about just m- more user-restoring vectors in this totally new application. But I just like, sort of inspired by long context generally, I think there's sort of this really interesting intermediate query in addition to sort of k and n for, like, question answering. And then there's also kind of like structured retrieval where you have, like, an exact property or like attribute, like price is a float and it's either less than 2 million or, or greater, like things like this. Let's say you're searching through houses or so- something like that. But then I think there's kind of this inter- this interesting like- 
+
+00:26:34,858 --> 00:26:34,858 [Speaker 1]
+Mm-hmm 
+
+00:26:34,858 --> 00:26:50,068 [Speaker 0]
+... intermediate query where say you have a database of images and you're saying, "How many have a nice, a nice pool that looks like this pool?" And it's like... it's not something that's pre-computed. It's gotta compute it on the fly and then it's gotta do it to an absolutely enormous scale. That's kind of where I see this eff- 
+
+00:26:50,068 --> 00:26:50,568 [Speaker 1]
+Mm-hmm. 
+
+00:26:50,568 --> 00:27:25,347 [Speaker 0]
+This is like a new... another new application. But anyway, so, so yeah, so thanks for taking that detour on me. I think maybe this topic of vector embeddings are all you need is like a funny [laughs], a funny kind of takeaway. And, but I think, I think definitely more future-looking of a thing, but I wanna kind of come back into, yeah, the, the RL expansion policy and how you train it to sort of just come understand the mechanisms more. I'm curious... I'm very curious about the sort of sequential selection of chunks. Uh, do you see that as being a latency bottleneck? Um, yeah. 
+
+00:27:25,348 --> 00:28:05,708 [Speaker 1]
+Yeah, that's a good question. Um, actually, uh, when we designed this, our policy ready, um, we were thinking about latency, uh, consideration. 'Cause if you think about sequential selection, right, you would have to do it... Um, so let's say we have n chunks and we want to select m chunks to uncompress. Um, so we have to roll out the policy for m times to eventually, uh, get the m chunks to, to decompress, uh, to uncompress. So, um, so the... W- w- we did some, um, optimization to mitigate that problem. And the way that we do it is that, um, it's kind of like point network. Um, 
+
+00:28:05,708 --> 00:28:51,888 [Speaker 1]
+so the, the, the... I, I don't know if you're familiar with point network. The way that it, it does is that they only forward, um, the... So for the policy network, right, they only do one forward. And after that one forward, they could automatically decide, um, what are the end, uh, s- uh, end steps to take, um, by doing masking. So, um, let me give you an example. Let's say we have a number of, uh, embedding as input, right, uh, to our policy network. And, um, our policy network will eventually output a, um, multinomial distribution on this end number of, um, a number of, uh, chunks. And for that multinomial distribution, um, 
+
+00:28:51,888 --> 00:30:02,028 [Speaker 1]
+in, in the first step we pick one chunk, um, from... by sampling from that multinomial, uh, distribution. After we sample that chunk, uh, we don't re-forward, uh, the... do another forward for the policy network. What we did is that we take the logins from the output, and then we mask the position that we already selected, and we do, um, softmax again, to, to get another multinomial distribution. And we sample from that, uh, for the next action. So basically, rolling out m times only means we do m sampling from, uh, a distribution that was masked and renormalized. And, uh, this is really, uh... I, I think it's, it's, it's a quite common way to, uh, to mitigate, uh, the, uh, the latency, um, in, in, in that field. So, um, we, we just decided to adopt that, um, solution 'cause, um, you know, doing multiple steps, the main bottleneck is that you have to re-compute the... the, um, the output for many times. But now we, we save that, um, um, steps and, um, 
+
+00:30:02,028 --> 00:30:08,468 [Speaker 1]
+do not add, um, additional, um, latency to the system. 
+
+00:30:08,468 --> 00:30:23,978 [Speaker 0]
+That's amazing. Yeah, I wish... Uh, I, I can't wait till the sort of video generation tools get to the point where I... where we can take that clip, your explanation of that, and then just give it to say Veo and it'll output one of those three blue, one brown animations of this multinomial sampling. 
+
+00:30:23,978 --> 00:30:24,008 [Speaker 1]
+[laughs] 
+
+00:30:24,008 --> 00:30:31,488 [Speaker 0]
+I think that'll be such a cool thing for these technical podcasts. So, but anyway, so, so yeah. Uh, s- sort of, uh, transitioning a little bit- 
+
+00:30:31,488 --> 00:30:31,498 [Speaker 1]
+Yeah 
+
+00:30:31,498 --> 00:31:03,876 [Speaker 0]
+... maybe coming out of just training the reinforced learning expansion policy, and then, you know, and the policy itself, if we could talk about this sort of like-... a four-stage training algorithm for training Refrag. I think we maybe glossed over it as we were just, you know, talking about all these topics. But, um, you- you first have this thing where you take the encoder and you project the embeddings into the decoder's latent space, uh, and- and then you have this sort of reconstruction task, continual pre-training. Uh, do you mind just kind of explaining these stages of, uh, training Refrag? 
+
+00:31:03,876 --> 00:32:09,096 [Speaker 1]
+Yeah, sure. So, um, all these stages... So the- the main, uh, purpose of, m- our work is actually to develop- develop this, uh, four-stage training recipe. And the goal of our work is really to, um, have a general res- training recipe so that we can adapt any decoder and encoder combinations to, um, t- to work like our system, uh, but like what we- we- we want, right? And, um, so but the- the main, uh, you know, the- the main problem that we need to address is that those encoder model, right, they do not, um, uh... Those decoder model, right, they do not naturally understand the- the embedding from the- the- the encoder. And this is because they were not trained, um, together during the pre-training, right? So, the decoder naturally do not understand the chunk embedding. We need to find a way to align the encoder and decoder so that decoder could understand it, the- the embedding information, and actually use that information to help us, um, to answer the question. So, 
+
+00:32:09,096 --> 00:32:34,056 [Speaker 1]
+um, to do that, you know, um, we- we actually tried, uh, a lot of stuff. Um, if you just train, uh, train the rack, um, SFT, um, using supervise- uh, supervised fine-tuning on- on encoder and decoder for the rack tasks, it doesn't work because, um, the decoder would- uh, would, uh, find an easier local optimum by ignoring all these chunk embeddings. 
+
+00:32:34,056 --> 00:33:45,475 [Speaker 1]
+So, that's really why we would want to use the reconstruction task because we want the decoder to force... Um, to be forced to, um, attend- to attend to the chunk embedding and then actually use that information to help us to generate the answer. And we find that- that the reconstruction task is really a- a good way to- to force the en- the decoder to pay attention because it, um, if the decoder could pay attention to the chunk embedding and, uh, actually understand the chunk embedding, it should perfectly reconstruct everything that was encoded in- in that embedding, right? So, that's our assumption. And, um, so for our reconstruction task, we just chunk a- a big, uh, a- a very long text and then, uh, compute the chunk embedding, and we just ask the decoder to use those chunk embedding to, uh, reconstruct what's, uh, inside the chunk embedding. And that really helps a lot for the decoder to pay attention, um, to the- to the, um, chunk embedding. And during the process, we found that, um, that curriculum learning is also important because, um, 
+
+00:33:45,476 --> 00:35:29,836 [Speaker 1]
+they- they are different level of, uh, difficulty, um, in- in terms of reconstruction. So, think about the decoder take one chunk embedding versus the decoder take 100 chunk embedding. These two tasks, they are very different and in- in terms of, uh, difficulty level, right? So, um, let's say one chunk have 16 tokens. If you reconstruct 16 token from one chunk embedding, that's actually a very easy task for decoder. But if you... I- if you want the decoder to reconstruct, uh, maybe 2K token from 128 chunk embedding or 200... And that- that- that's actually very difficult because, um, the decoder was never, um, trained to take so many chunk embedding in the first place. So, it... We- you would have to, um, learn this process step by step. So, it- it will take a look at the, uh... It- it will start learning with fewer chunk embedding, and as the training pro- progress, we will want to put more chunk embedding in the input so the decoder can, um, slowly adapt to more chunk embedding and- and eventually, um, arrive to the checkpoint that we want. So, these- these techniques, they actually, um, vital to their... To the successful, um, of the alignment. And so what we found is that if you don't do these two task, like remove e- any of these two, uh, um, tasks, you wouldn't be able to get a- a good alignment. And a lot of time, the decoder would just ignore all these chunk embeddings. So, we found these two stage very useful and, um, to some extent, they are necessary in- in our case. Yeah. 
+
+00:35:29,836 --> 00:35:30,766 [Speaker 1]
+So, these are- are the two, um- 
+
+00:35:30,766 --> 00:35:31,496 [Speaker 0]
+That's super interesting 
+
+00:35:31,496 --> 00:35:44,375 [Speaker 1]
+... um ... you know, sir? Yeah, yeah. Th- these are two- two main training recipe for, uh, getting, uh- uh, getting the decoder to understand a chunk embedding. 
+
+00:35:44,375 --> 00:36:13,756 [Speaker 0]
+Yeah. Sorry to cut you off of it. I think our- our latency a little bit as we stream our podcast [laughs] around the world, uh, cut me off a li- or confused me a little bit. But anyways, um, yeah, it's so interesting to hear about the curriculum learning. I remember kind of like, um, when, uh, MosaicML had their MPT, uh, 65K and they were doing... I think it was like alibi attention and rope scaling and- and this kinda thing of, yeah, we just took the pre-trained language model and now we're introducing long gen- long inputs into the data and that, like, you- 
+
+00:36:13,756 --> 00:36:13,766 [Speaker 1]
+Mm-hmm 
+
+00:36:13,766 --> 00:36:58,596 [Speaker 0]
+... you have this curriculum learning. It's something that I could see maybe being a part of the DSPy story. I- I have to put a DSPy reference in all my... in all the podcasts, but, um, uh, yeah. So, uh, so talking... I wanted to ask more about the mechanics behind trading the decoder with the encoder. Um, maybe also on DSPy where now I- I really am excited about the Arbor tool and how Arbor is letting us use GRPO with models in VLLM. Um, but to then also put the gradients from the decoder back to the encoder is-... uh, so would you... You would have to have the same PyTorch... You had to use say, PyTorch or something like that, right? Y- c- y- t- ho- like, ha- how particularly do you implement this, where you take the gradients from the decoder and put 'em back to the encoder? 
+
+00:36:58,596 --> 00:37:44,696 [Speaker 1]
+Yeah. It a- actually, it's very, uh... You know, PyTorch is really a, a powerful, uh, you know, tool. Um, uh, you don't actually need to do anything. Just make sure that everything is, um... everything is, um, uh... e- every tensor in, in the n- network has a gradient, and it will automatically prop and, uh, just get a back propagate to the whole network. So, um, what I did is that I just take the, um, encoder output and then do a projection to the token embedding, and then put that token embedding in the decoder input and in the decoder input. So, the whole system has, um, uh, gradient information and the PyTorch will, uh, automatically, um, do the back propagation for you. 
+
+00:37:44,756 --> 00:38:47,936 [Speaker 0]
+S- s- uh, have you, have you also maybe looked into say, using like, Hugging Face, uh, could make it maybe easy to... Because I'm, I'm thinking about, uh, PyTorch sometimes m- 'cause I'm trying to grab a pretrained LLM and a pretrained embedding model, and I'm trying to now throw them into my system. Um, do you think... Y- yeah, I d- I don't know what the current state is between PyTorch versus Hugging Face and what's easier to load pretrained weights. So, just be honest, I'm mostly using vLLM and I haven't really thought too much about, about how you're connecting these things. But, um, uh, yeah. So I guess my question would be, uh, and maybe just kind of coming into the tooling, I think the big question would be, uh, w- t- when we see Refrag LLMs, is the API gonna have an embedding model as well as an LLM, you think? Do you think it'll be easy to sort of plug and play, bring your own embedding model, bring your own LLM, and then there's some like, Refrag comp- pilation layer on top of... How, how do you see these models sort of spreading into the 
+
+00:38:47,936 --> 00:38:51,036 [Speaker 0]
+market if... Yeah. 
+
+00:38:51,036 --> 00:38:55,996 [Speaker 1]
+Um, are, are you asking about the open source of the model or, uh, like open source of the code- 
+
+00:38:55,996 --> 00:38:56,006 [Speaker 0]
+Yeah 
+
+00:38:56,006 --> 00:39:03,736 [Speaker 1]
+... so that the community could, um, just, just try on, on their, uh, model and, and on their database? 
+
+00:39:03,736 --> 00:39:06,396 [Speaker 0]
+Uh, yeah. Sorry. It was [laughs] I was just like, thinking out loud. 
+
+00:39:06,396 --> 00:39:07,176 [Speaker 1]
+Yeah. So the- 
+
+00:39:07,176 --> 00:39:07,956 [Speaker 0]
+Uh, maybe we could- 
+
+00:39:07,956 --> 00:39:24,136 [Speaker 1]
+It's a, it's a tricky question. [laughs] Um, 'cause you know, I, I actually... I, I have done all the, all the work, but, uh, w- we are working, uh, super hard to, um, to push that, um, to, uh, the, the open source community. And, um, 
+
+00:39:24,316 --> 00:40:00,296 [Speaker 1]
+so just stay tuned. We, we will have that, um, available very soon. And, um, yeah, I, I, I think, uh, if you take our code, um, you could just, um, run on any Hugging Face pretrained decoder and encoder 'cause our model, um, our repo is built on top of those, um, Hugging Face APIs and, um, transformer APIs. So, um, you, you could just, um, take a, uh, take a checkpoint from Hugging Face and directly use in our system to train your own encoder/decoder. 
+
+00:40:00,296 --> 00:40:12,476 [Speaker 0]
+And so then I guess maybe just asking about the sort of computation that that might require for open source. Uh, like how m- like how many GPUs am I gonna need to... uh, and, you know, GPU hours? [laughs] 
+
+00:40:12,476 --> 00:40:22,636 [Speaker 1]
+Yeah. So, um, that, that's a good question. Um, actually for, um, the 7B model that I tried previously, um, 
+
+00:40:22,636 --> 00:40:32,596 [Speaker 1]
+y- you could run it on a single machine with eight cards, and... but that would take you, um, maybe, uh, 
+
+00:40:32,596 --> 00:41:16,996 [Speaker 1]
+five to s- uh, five to six days, um, i- if, if you train on one single machine. Um, so, uh, for the whole... uh, like for all the training stages. So I, I, I think if you, um, if you really, um... if, if you don't have a lot of resource, right? For example, one G- one, one machine with eight GPUs, um, you could, you could train our model very easily, but it will take some time. Yeah. It will take a few days to finish all the... to, to finish all the, um, all the stages. But if you have more GPUs, like, um, maybe, um, eight machines with eight cards, you could finish it in one or two days. 
+
+00:41:16,996 --> 00:42:02,196 [Speaker 0]
+That's pretty exciting. Yeah. I think, uh, I, I, I'm super excited to just see the sort of releases of these models and... Yeah. I nee- I, I'll admit I need to dive into the code more. I've been sort of looking at this from just like, trying to wrap my head around the algorithm. But yeah, I'm definitely really excited to be diving into that. Uh, yeah. May- so maybe we could also just talk a bit more about some of the experiments you did in fa- so, uh, so we've been s- so I mean, I think that it's absolutely amazing that it would take you five to six days single machine to do that sort of reconstruction task to align the encoder and the decoder and this continual pre-training to get the decoder used to attending over these compressed chunk embeddings. Uh, but then there's this, um, sort of downstream task tuning phase, and I wanna just maybe talk... like, ask more about your experience with, uh, evaluating- 
+
+00:42:02,196 --> 00:42:02,206 [Speaker 1]
+Mm-hmm 
+
+00:42:02,206 --> 00:42:09,936 [Speaker 0]
+... Refrag on question answering, multi-turn conversation and summarization, and just what you think about that sort of last leg of the mile? 
+
+00:42:09,936 --> 00:43:05,312 [Speaker 1]
+Yeah. So, um, actually in our project, we don't focus on th- on those, uh, downstream tasks 'cause we, we feel that, um, those downstream tasks, they, they are, um... they are kind of, um... it, it's, it's, it's actually difficult to evaluate, um, uh, on those tasks and, um, to, to give a fair comparison. And, um... but we, we try our best to do the benchmark on those, um, downstream tasks like long, long document summarization, where we, um, put the whole document into-... into the context, which chunk the whole document, and then we ask the decoder to summarize what's in the, what's in the document. And we train, uh, the uncompressed LLaMa model, uh, and we also train the compressed model using our, uh, Refrag. And, uh, it turns out that, um, 
+
+00:43:05,312 --> 00:45:18,071 [Speaker 1]
+we get pretty good result when thinking about the same latency. So, uh, if you think about the same latency, right, um, for our model, we could put more context in a, in the context window. But for the original LLaMa model, you will have to, um, truncate some of the context to, to have similar, uh, just to have similar latency. So, um, the long-context summar- summarizes is really a, a, a, a demo, um, a demo task that, uh, we can, uh, immediately see the benefit of Refrag. We could get better performance under the same latency because of having this longer context window. And, um, another benefit, um, we, uh, we could see is, um, from the, uh, RAG tasks that we, uh, we, we did fine-tuning. So what we did is that we, uh, collect, um, two of the two million data points that are specifically designed for RAG, um, for RAG. So basically, each data point has, um, uh, one question and then have a few chunks from the system and has its, and has its corresponding answer. And we have two million [items clatter] of them, and we just SFT our, uh, pretrained, uh, our, our continued pretrained, uh, checkpoint on those tasks. And what we have observed is that, um, under the compression rate of six- 16, right? Under the s- compression rate of 16, the... Given the same amount of information to the original LLaMa model and our model, we could almost achieve similar performance in terms of accuracy of the RAG system. And, uh, another, uh, r- result that, uh, I think is pretty impressive is, is that, um, given the same latency for the RAG system, right, our model could consistently outperform the LLaMa model. Because given the same latency, we could put more chunk search result into the context, and that would reduce the risk of missing the information, um, to... that is necessary to answer the question. So we, we actually observed 2%, uh, average performance, um, boosting, um, 
+
+00:45:18,071 --> 00:45:56,952 [Speaker 1]
+over, uh, multiple tasks. Um, definitely check out our, um [items clatter], performance table in, in our paper to, um, to figure out more. But those result, they are, they are kind of, uh, demonstrations to, to show the potential of our work. Um, and I... If, if you really read our paper, I, I would, uh, recommend, uh, you know, uh, to focus on, on the pre-training part because th- those are the part, pre-training and our part, 'cause these are the part that, uh, we did, uh, like rigorous com- co- comparison, um, without those, uh, noise in, in the SFT, uh, tasks. [items clatter] 
+
+00:45:56,952 --> 00:46:36,011 [Speaker 0]
+Yeah, that's amazing. Uh, y- I mean, I think... But maybe if I could just get your quick take on the... There's this sort of, like, lost in the middle context rot, this kind of... You- e- this is a... But this kind of clever architectural solution, do you think there also might be, like, particular training data? Like, 'cause I imagine it's like language modeling on the internet, the pre-training as you're predicting the next token, it's like how often is there informative content, like 20,000 tokens back. Do, do you think it's a training data problem as well or it's just sort of this Refrag clever architectural trick that's the way to solve this? 
+
+00:46:36,011 --> 00:46:47,231 [Speaker 1]
+Yeah. Uh, I definitely think that, um, it's a combination of both. So wh- when it comes to the, uh, performance of the language model, I, I would say that the data is always, you know, the, 
+
+00:46:47,232 --> 00:47:19,491 [Speaker 1]
+the, um... that, uh, one of the most, um... I would say, like, sometimes even fundamental, you know, the data is, is really, uh, something that we, we care about, and especially, you know, what kind of data you want to put in the training and what will be the mixture of those data. And, um, you, you are right, uh, a lot of time, you know, wh- uh, whe- when you think about those long-context problem, right, you, you would have to come up with, um, you- you know, good data, especially, uh, for those data that, uh, have very long context. But, um, 
+
+00:47:19,491 --> 00:48:10,832 [Speaker 1]
+you know, you, you kind of have to have the, uh, f- uh, you know, the data points that is very similar to finding needle in hay, right? And, um, that- that's, um, that's something that, um, I believe, um, is important for model training. And, um... But we didn't do a lot of, um, data ... Um, we, we didn't do a lot of data ablation in our, um, experiment because we, we... in, in this work, we mainly focus on, you know, the model architecture. But I, I would say, like, data is fundamental, and, um, you could do a lot of fun research there, um, in terms of, um, how do you... how do you figure out the best data mixture, and how do you know what kind of data you need to achieve those con- non-context capa- uh, capability of the language model? [items clatter] 
+
+00:48:10,832 --> 00:48:45,752 [Speaker 0]
+Yeah, amazing. Yeah, I think it's, it's super exciting. I, I guess kind of like maybe rounding out some questions, I, I definitely wanted to kind of talk about the time to first token improvement and compare sort of time to first token latency with overall LLM throughput latency. I think it's just such an interesting thing. Like one thing, I think there's Cerebras and Grok are these two companies making these customized chips, and I think the story is that Cerebras is faster time to first token, whereas Grok is faster through put in. And so... And also shout out to Baseten, they have... They're doing a great job with time to first token, I think just with engineering skill and 
+
+00:48:45,752 --> 00:48:46,832 [Speaker 3]
+[laughs] 
+
+00:48:46,832 --> 00:48:49,551 [Speaker 0]
+... TV use. But, um, could you maybe just sort of explain...
+
+00:48:49,756 --> 00:48:59,436 [Speaker 4]
+... how you understand, like just, uh, maybe talk more about this kind of time to first token, first throughput latency with LMs. 
+
+00:48:59,436 --> 00:49:36,216 [Speaker 1]
+Yeah, so, um, actually for time to first token, it's, it's always a, a very, um, important matrix in the, in the production system for different companies. And I talked to a lot of people in the industry, and they, they all, um... They, they are all aware of this matrix and, um, in a lot of companies, they, they think this matrix is, you know, fundamental for the user experience. And, um, so there are a lot of existing work that, um, try to accelerate the LM inference, right? Um, some through condensation, some through, you know, um, 
+
+00:49:36,216 --> 00:49:56,746 [Speaker 1]
+serv- um, engineering the serving of the language model, right? Um, and also, um, some, some work, they try to change the attention mechanism, so that when you do the attention, the, uh, transformer will take, um... would, would, would, um, would scale linearly with respect to the prompt, the Mm. 
+
+00:49:56,746 --> 00:50:38,156 [Speaker 4]
+... length of the prompt. So, these are, are the, uh, are the very, uh, interesting work to... You know, they, they already try to accelerate the time to first token in a general use case, right? In, in a general, um, um, inference. And we believe that this method, they, they are still useful, um, uh, in a lot of, uh, applications. But, you know, in, in our work, the main focus is that, you know, for, for rep, right? We, we identify those, uh, u- um, unique structure there, and, um, we use those unique structure to further accelerate the, the time to first token, um, latency in, in, in the production system. And, um, 
+
+00:50:38,156 --> 00:51:15,136 [Speaker 4]
+those existing, uh, condensation and serving technique, they, they are kind of, um, orthogonal to our work. They could, uh, readily be applied to our work to further accelerate this time to first token. Um, but w- we didn't... uh, you know, we didn't try, try it, um, like all, all the combination in our work. And, um, I, I think it will be a, a fun, uh, a very fun, um, project to work on, like using all these, um, existing, uh, condensation and serving technique to further boost the time to first, first, first token latency for the refrag. 
+
+00:51:15,136 --> 00:51:21,456 [Speaker 4]
+Um, I, I think that they could be a, a, a, a major, um, performance boost. 
+
+00:51:21,456 --> 00:51:28,576 [Speaker 4]
+If you apply all the technique, it could multiply and, um, adding on top of each other. 
+
+00:51:28,576 --> 00:51:29,395 [Speaker 1]
+Mm. 
+
+00:51:29,395 --> 00:53:11,856 [Speaker 4]
+Yeah, super cool. Yeah, I think like, um... I don't know. I don't want to throw out some kind of number, but I think like t- like maybe like 300 millisecond LM inference time is a, is a... I don't know, like ballpark or just giving, maybe not based off it too much. But, um, yeah, it's really cool to hear that there are sort of also orthogonal benefits of time to first token. I think, um, there... a lot of applications, like if you have a Boolean valued output from the LM or a classification label, it's sort of all about time to first token. And then compared to, you know, writing a long response, now maybe it's like some- somewhere in the middle and just... Yeah, really interesting sort of thing to be looking at. Um, uh, cool. So, uh, I also... I wanted to sort of... As we're running out, I, I, I always think of the podcast with the general sort of future directions question, but, uh, but I want to just, um, ask one more question about the sort of schema of the refrag vectors. And I've already learned a lot from talking to you about, uh, m- some... Maybe sometimes you pre-compute it, sometimes you do compute the chunk vectors on the fly. Um, but I wanted to talk maybe about the sort of granularity of like, um, wha- whether you say retrieve the search results with a chunk and then you... uh, but then what is actually passed the refrag is like the entire blog post. So, sort of like an embed small, like retri- or like re- retrieve small, read big. Or maybe if you have sort of like a Matryoshka representation for refrag, where you have like a K equals 256, but then you also have K equals 16, like nested within the 256. And so maybe just kind of asking about like how you think the future of this, this schema design will evolve with all these different ways you could vectorize the content? Yeah. 
+
+00:53:11,856 --> 00:55:32,071 [Speaker 1]
+Yeah, definitely. Um, I, I think you, um, you, you mentioned a, a few, uh, very interesting direction that, uh, I also want to talk about. So, uh, one ma- main, uh, you know, uh, one main idea that I, I think people could, um, do, um, further exploration is that, uh, if you think o- our, um, our selective, selective policy, right? It's kind of w- uh... it, it kind of works like a, a dynamic, dynamic tokenizer, right? Um, we kind of decide, uh, how many tokens we want to put for certain context, right? Um, so for... So, in our case, you know, for, for chunks with more information, we use more tokens to represent it. But, but for, um, chunk with less information, we use one single token to represent the whole thing. And I certainly think that... Uh, I, I believe that there are better way to do it. Um, and, um, in our case, we, we only do binary, right? But a more... uh, a more ideal case is that, you know, for the whole sentence, we can decide... um, we can decide where to chunk. And, um, think about a, a, a token as a, a bag, right? You have one bag there. And, um, for each token, ideally you want to put, um, a s- similar amount of information there, right? And we could use those dynamic chunker to decide when to s-... when to, to, uh, cut the text off, so that this certain, uh, chunk has, um, a, a, a unique number of information. And, um... and we do a different length of, of chunking to make sure that, um, different... uh, like each, each token they contain this... similar amount of information.... and, um, and we could- we could also do th- this dynamic chunker, um, training it along with the decoder model so that they can, um, do end-to-end train- end-to-end training, uh, and, uh, decide where to, um, where to cut the text more, uh, smartly. So I- I certainly beli- believe that, uh, that- that's a- that's a better way, that's a, a, a perfect way to, to do, um, um, to do the chunking, uh, for the, um, rack system. And, um, I- I- I think, uh, if, um, i- i- it's a very interesting topic to work on 
+
+00:55:32,071 --> 00:55:34,932 [Speaker 1]
+in the future. 
+
+00:55:34,991 --> 00:56:15,232 [Speaker 0]
+Yeah, it's amazing. It c- it- it sounds like sort of the next level to that late chunking idea. I think Jina AI had, uh, came up with it. Um, I'm just kinda struggling to recall the exact details of it. [laughs] I think you, um, I think it's like you embed the whole context and you have the contextual interaction. [laughs] I'll have to cut out this part of the podcast out. But we have a blog post on- on our Weaviate blog, and- and they're- and Jina has their great paper describing this. But, uh, anyways, uh, Yaging, uh, sort of the question I would anchor the podcast with, Refrag is obviously super, super exciting in itself, and maybe this is sort of your answer to the question, but, uh, what- what future directions for AI excite you the most? 
+
+00:56:15,232 --> 00:57:10,412 [Speaker 1]
+Yeah, I- I- I think right now, um, the agentic, um, is really, uh, one direction that I- I feel is- is, um, most exciting for me 'cause, um, you know, that- that's actually one of the reason why I- I wanted to work on this project, 'cause, um, context, uh, management is a very fundamental problem in agentic AI. And, uh, think about in our, um, research, we- we only do- uh, we- we only consider the search agent, right? Um, where, um, the- the e- the environment return the search result, and you would have to, um, do some management in the, um, search result so that, um, it- you wouldn't, uh, um, make the context super long. And, um, I- I believe that they, um, for the- the whole agentic system, there are more, uh, stuff to, um, there are many more stuff to, um, 
+
+00:57:10,412 --> 00:57:48,812 [Speaker 1]
+to work on, um, besides this, um, this- this, uh, specific way of doing, um, context engineering. And, um, for example, you know, uh, our- our Refrag, they- they, um, we could extend this work to, uh, like different, uh, not just search agent. We can do, uh, uh, the- this Refrag compression for, um, multimodal, um, language models so that, uh, it c- it could be applied to those, uh, GUI computer use agent, and, um, and it could also be applied to those, um, um, 
+
+00:57:48,812 --> 00:58:18,151 [Speaker 1]
+you know, the- the agent that take a lot of context information. And, um, as- as I mentioned earlier, you know, uh, for Refrag, um, if you compute on the fly, you still get the, uh, latency improvement, and that means that any, uh, context, right? It doesn't have to be search result. Just- just be any context that is super long, you could use our technique to- to do further accele- acceleration. So I- I certainly believe that, um, there are 
+
+00:58:18,151 --> 00:58:35,591 [Speaker 1]
+many similar, uh, uh, challenges that we could address, um, in- in a ge- agentic AI system. And Refrag is, uh, is, uh, um, is one of my, um, uh, attempts to, um, solve some of the fundament- fundamental problem in- in this system.
+
+00:58:38,671 --> 00:59:34,591 [Speaker 1]
+ Yeah, that's such an amazing idea. I- I give a quick mention to Charles Pierce from Weaviate who had i- introduced this idea to me in, uh, the Substack article he wrote about Refrag that was, uh... So it's the number one on Hacker News for the weekend, [laughs] so that was something that we were really happy about. But, um, it's this idea that, um, that, uh, uh, like, we're reading these vectors, can we also write these vectors? And like you mentioned, not just the search results coming back with these vectors, but just say like an agent is calling the Get Weather API... That's maybe a bad example, but say it returns the weather to you with these Refrag vectors. I mean, weather is a terrible example, but say like even your email API, you're expecting even your email API to come back with all these vectors. And- and yeah, that's- that's really interesting 'cause, yeah, you have like this function calling loop agent, and as it gets to 20 steps of function calling, now it's got this big message history and- and it can't attend over it anymore. Uh, that's so cool. That's- that's a really exciting... 
+
+00:59:34,591 --> 00:59:34,611 [Speaker 1]
+Yeah. 
+
+00:59:34,611 --> 00:59:59,732 [Speaker 0]
+That kind of idea of, um... Yeah. But yeah, like, uh, a- agents sending vectors to other agents is- is like agent as a tool, uh, and, yeah, it's a really awesome one. Well, Yaging, uh, thank you so much for joining the Weaviate podcast. This is really just one of the most fun ones of all time. I've learned so much from this conversation, and it just is... Refrag is so exciting, so much fun to dive into these ideas. Thanks again for joining. 
+
+00:59:59,732 --> 01:00:00,812 [Speaker 1]
+Yeah, thanks for having me.
