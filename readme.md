@@ -4,6 +4,10 @@ An MCP server for the Weaviate Podcast!
 
 ### Episode List
 
+[133] AI-Powered Search with Doug Turnbull and Trey Grainger
+- [YouTube](https://www.youtube.com/watch?v=ZnQv_wBzUa4)
+- [Spotify](https://spotifycreators-web.app.link/e/2tujjWcp71b)
+
 [132] Pyversity with Thomas van Dongen
 - [YouTube](https://www.youtube.com/watch?v=L2N1qvfP7tg)
 - [Spotify](https://spotifycreators-web.app.link/e/FBaEZ9b5UYb)
