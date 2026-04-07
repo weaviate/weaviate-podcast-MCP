@@ -4,6 +4,10 @@ An MCP server for the Weaviate Podcast!
 
 ### Episode List
 
+[135] Data Agents with Shreya Shankar
+- [YouTube](https://www.youtube.com/watch?v=C-fNVPYZrVg)
+- [Spotify](https://spotifycreators-web.app.link/e/juDmrVcp71b)
+
 [134] Multi-Vector Search with Amélie Chatelain and Antoine Chaffin
 - [YouTube](https://www.youtube.com/watch?v=44GC3E-WbHU)
 - [Spotify](https://spotifycreators-web.app.link/e/wcADSVcp71b)
