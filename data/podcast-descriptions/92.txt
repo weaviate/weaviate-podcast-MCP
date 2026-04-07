@@ -1,0 +1,9 @@
+Hey everyone! Thank you so much for watching the 92nd episode of the Weaviate podcast! I've seen a lot of interest around RAG for X application domain, Legal, Accounting, Healthcare, .... David and Kevin are maybe the best example of this I have seen so far, pivoting from Neum AI to VetRec!
+
+We begin the podcast by discussing the decision to switch gears, the advice given by Y Combinator, and David's experience in learning a new application domain.
+
+We then continue to discuss technical opportunities around RAG for Veterinarians, such as SOAP notes and Differential Diagnosis!
+
+We conclude with David's thoughts on the ETL space, companies like Unstructured and LlamaIndex's LlamaParse, advice for specific focus in ETL, and general discussions of ETL for Vector DBs / KGs / SQL.
+
+David and Kevin have been two of my favorite entrepreneurs I've met during my time at Weaviate! They do an amazing job of writing content that helps you live vicariously through them as they take on this opportunity to apply RAG and AI technologies to help Veterinarians! 
