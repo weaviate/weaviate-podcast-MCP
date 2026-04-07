@@ -1,0 +1,5 @@
+Hey everyone! Thank you so much for watching the 103rd Weaviate Podcast with Krista Opsahl-Ong from Stanford University. Krista is the lead author of MIPRO, short for Multi-prompt Instruction Proposal Optimizer, and one of the leading developers and scientists behind DSPy!
+
+This was such a fun discussion beginning with the motivation of Automated Prompt Engineering, Multi-Layer Language Programs (also commonly referred to as Compound AI Systems), and their intersection. We then dove into the details of how MIPRO achieves this and miscellaneous topics in AI from Structured Outputs to Agents, DSPy for Code Generation, and more!
+
+I really hope you enjoy the podcast! As always, more than happy to answer any questions or discuss any ideas about the content in the podcast!

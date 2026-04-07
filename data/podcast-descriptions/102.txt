@@ -1,0 +1,3 @@
+AI is completely transforming how we build software! But how exactly? What does it mean for a software application to be AI-Native versus AI-Enabled? How many other aspects of software development and creativity are impacted by AI?
+
+Guy Podjarny is a co-founder of Snyk, a remarkably successful Cybersecurity company. He is now back on the founder journey, diving into AI-Native Development with Tessl! Guy and Bob both have so much expertise in how software is developed and shipped to the world. There are so many interesting nuggets in this from defining AI-Native to Stateful AI, AI-assisted coding, subjectivity in software specification, personalized content, and much more!
