@@ -4,6 +4,10 @@ An MCP server for the Weaviate Podcast!
 
 ### Episode List
 
+[134] Multi-Vector Search with Amélie Chatelain and Antoine Chaffin
+- [YouTube](https://www.youtube.com/watch?v=44GC3E-WbHU)
+- [Spotify](https://spotifycreators-web.app.link/e/wcADSVcp71b)
+
 [133] AI-Powered Search with Doug Turnbull and Trey Grainger
 - [YouTube](https://www.youtube.com/watch?v=ZnQv_wBzUa4)
 - [Spotify](https://spotifycreators-web.app.link/e/2tujjWcp71b)
