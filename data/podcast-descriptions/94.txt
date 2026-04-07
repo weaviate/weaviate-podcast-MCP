@@ -1,0 +1,7 @@
+As you are graduating from ideas to engineering, one of the key concepts to be aware of is Parallel Computing and Concurrency. 🔒🔓
+
+I am SUPER excited to share our 94th Weaviate podcast with Magdalen Dobson Manohar! Magdalen is one of the most impressive scientists I have ever met, having completed her undergraduate studies at MIT before joining Carnegie Mellon University to study Approximate Nearest Neighbor Search and develop ParlayANN. ParlayANN is one of the most enlightening works I have come across that studies how to build ANN indexes in parallel without the use of locking.
+
+In my opinion, this is the most insightful podcast we have ever produced into Vector Search, the core technology behind Vector Databases. The podcast begins with Magdalen’s journey into ANN science, the issue of Lock Contention in HNSW, further detailing HNSW vs. DiskANN vs. HCNNG and pyNNDescent, ParlayIVF, how Parallel Index Construction is achieved, conclusions from experimentation, Filtered Vector Search, Out of Distribution Vector Search, and exciting directions for the future!
+
+I also want to give a huge thanks to Etienne Dilocker, John Trengrove, Abdel Rodriguez, Asdine El Hrychy, and Zain Hasan. There is no way I would be able to keep up with conversations like this without their leadership and collaboration.

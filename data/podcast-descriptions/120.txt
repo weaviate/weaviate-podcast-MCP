@@ -1,0 +1,4 @@
+Ben walks us through Box's three-layer infrastructure puzzle: First, the mind-boggling base infrastructure (think millions of interactions per second and trillions of files). Second, their unique multi-tenant security challenge - unlike most SaaS platforms, Box users share content across company boundaries, making traditional tenant isolation impossible. And third, ensuring AI respects all these complex permissions while still delivering value.
+The podcast then dives further into how vector embeddings can balloon file sizes - a few hundred bytes of text can require 4-6KB of vector data storage! We also dig into why RAG remains essential despite growing context windows, and how Box is developing AI agents that transform painful enterprise processes like RFP responses.
+
+A fun, insightful look at what happens when cutting-edge AI meets enterprise-grade security and scale requirements!

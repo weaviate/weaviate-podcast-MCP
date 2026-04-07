@@ -1,0 +1,5 @@
+AI Researchers have overfit to maximizing state-of-the-art accuracy at the expense of the cost to run these AI systems! We need to account for cost during optimization. Even if a chatbot can produce an amazing answer, it isn't that valuable if it costs, say $5 per response!
+
+I am beyond excited to present the 104th Weaviate Podcast with Sayash Kapoor and Benedikt Stroebl from Princeton Language and Intelligence! Sayash and Benedikt are co-first authors of "AI Agents That Matter"! This is one of my favorite papers I've studied recently which introduces Pareto Optimal optimization to DSPy and really tames the chaos of Agent benchmarking!
+
+This was such a fun conversation! I am beyond grateful to have met them both and to feature their research on the Weaviate Podcast! I hope you find it interesting and useful!

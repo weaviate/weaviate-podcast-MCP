@@ -1,0 +1,5 @@
+Hey everyone! I am SUPER excited to publish our newest Weaviate podcast with Kyle Davis, the creator of RAGKit! At a high-level, the podcast covers our understanding of RAG systems through 4 key areas: (1) Ingest / ETL, (2) Search, (3) Generate / Agents, and (4) Evaluation. Discussing these lead to all sorts of topics from Knowledge Graph RAG, to Function Calling and Tool Selection, Re-ranking, Quantization, and many more!
+
+This discussion forced me to re-think many of my previously held beliefs about the current RAG stack, particularly the definition of “Agents”. I came in believing that the best way of viewing “Agents” is an abstraction on top of multiple pipelines, such as an “Email Agent”, but Kyle presented the idea of looking at “Agents” as scoping the tools each LLM call is connected to, such as `read_email` or `calculator`. Would love to know what people think about this one, as I think getting a consensus definition of “Agents” can clarify a lot of the current confusion for people building with LLMs / Generative AI.
+
+I hope you find the podcast useful, this was such a fun one! Thank you so much for joining Kyle!

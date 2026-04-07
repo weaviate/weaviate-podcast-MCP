@@ -1,0 +1,5 @@
+Hey everyone! Thank you so much for watching the 96th episode of the Weaviate podcast featuring Letitia Parcalabescu! While completing her Ph.D. studies at the University of Heidelberg, Letitia started her YouTube channel: AI Coffee Break with Letitia! Her videos break down complex concepts in AI with a creative mix of technical expertise and visualizations unlike anyone else in the space!
+
+We began the podcast by discussing our shared background in creating content on YouTube from starting, to plans for the future, and everything else in between!
+
+We then discussed the evolution of Deep Learning over the last few years -- from neural network architectures to datasets, tasks, learning algorithms, and more! I think particularly we are at a really interesting time in the future of learning algorithms! We discussed DSPy and new ways of thinking about instruction tuning, example production, gradient descent, and the future of SFT vs. DPO-style techniques!

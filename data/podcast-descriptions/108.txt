@@ -1,0 +1,11 @@
+JSON mode has been one of the biggest enablers for working with Large Language Models! JSON mode is even expanding into Multimodal Foundation models! But how exactly is JSON mode achieved?
+
+There are generally 3 paths to JSON mode: (1) constrained generation (such as Outlines), (2) begging the model for a JSON response in the prompt, and (3) A two stage process of generate-then-format. 
+
+I am BEYOND EXCITED to publish the 108th Weaviate Podcast with Zhi Rui Tam, the lead author of Let Me Speak Freely? A Study on the Impact of Format Restrictions on Performance of Large Language Models!
+
+As the title of the paper suggests, although constrained generation is awesome because of its reliability, we may be sacrificing the performance of the LLM by producing our JSON with this method.
+
+The podcast dives into how these experiments identify this and all sorts of details about the potential and implementation details of Structured Outputs. I particularly love the conversation topic of incredible Complex Structured Outputs, such as generating 10 values in a single inference.
+
+I hope you enjoy the podcast! As always please reach out if you would like to discuss any of these ideas further!

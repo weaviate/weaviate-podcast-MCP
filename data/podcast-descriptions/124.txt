@@ -1,0 +1,1 @@
+Nandan Thakur is a Ph.D. student at the University of Waterloo! Nandan has worked on many of the most impactful works in Retrieval-Augmented Generation (RAG) and Information Retrieval. His work ranges from benchmarks such as BEIR, MIRACLE, TREC, and FreshStack, to improving the training of embedding models and re-rankings, and more!

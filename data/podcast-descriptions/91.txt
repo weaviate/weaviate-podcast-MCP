@@ -1,0 +1,7 @@
+Voyage AI is the newest giant in the embedding, reranking, and search model game! I am SUPER excited to publish our latest Weaviate podcast with Tengyu Ma, Co-Founder of Voyage AI and Assistant Professor at Stanford University!
+
+We began the podcast with a deep dive into everything embedding model training and contrastive learning theory. Tengyu delivered a masterclass in everything from scaling laws to multi-vector representations, neural architectures, representation collapse, data augmentation, semantic similarity, and more! I am beyond impressed with Tengyu's extensive knowledge and explanations of all these topics.
+
+The next chapter dives into a case study Voyage AI did fine-tuning an embedding model for the LangChain documentation. This is an absolutely fascinating example of the role of continual fine-tuning with very new concepts (for example, very few people were talking about chaining together LLM calls 2 years ago), as well as the data efficiency advances in fine-tuning.
+
+We concluded by discussing ML systems challenges in serving an embeddings API. Particularly the challenge of detecting if a request is for batch or query inference and the optimizations that go into either say ~100ms latency for a query embedding or maximizing throughput for batch embeddings.
