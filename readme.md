@@ -4,6 +4,14 @@ An MCP server for the Weaviate Podcast!
 
 ### Episode List
 
+[137] Search Agents with Nandan Thakur
+- [YouTube](https://www.youtube.com/watch?v=B71WF6EtgK8)
+- [Spotify](https://spotifycreators-web.app.link/e/IAgKLmSsT2b)
+
+[136] AgentIR with Zijian Chen and Xueguang Ma
+- [YouTube](https://www.youtube.com/watch?v=y9YUcr0cVtk)
+- [Spotify](https://spotifycreators-web.app.link/e/31WPgINsF2b)
+
 [135] Data Agents with Shreya Shankar
 - [YouTube](https://www.youtube.com/watch?v=C-fNVPYZrVg)
 - [Spotify](https://spotifycreators-web.app.link/e/juDmrVcp71b)
