@@ -4,6 +4,10 @@ An MCP server for the Weaviate Podcast!
 
 ### Episode List
 
+[136] AgentIR with Zijian Chen and Xueguang Ma
+- [YouTube](https://www.youtube.com/watch?v=y9YUcr0cVtk)
+- [Spotify](https://spotifycreators-web.app.link/e/31WPgINsF2b)
+
 [135] Data Agents with Shreya Shankar
 - [YouTube](https://www.youtube.com/watch?v=C-fNVPYZrVg)
 - [Spotify](https://spotifycreators-web.app.link/e/juDmrVcp71b)
